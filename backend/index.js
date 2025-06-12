@@ -88,6 +88,9 @@ function requireAdmin(req, res, next) {
 const FRONTEND = path.join(__dirname, '../frontend');
 
 app.get('/', (req, res) => {
+  if (req.user) {
+    return res.redirect(req.user.role === 'admin' ? '/admin.html' : '/index.html');
+  }
   res.redirect('/login.html');
 });
 

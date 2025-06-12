@@ -8,13 +8,12 @@
 <body>
   <button id="langToggle"></button>
   <button id="logout" data-i18n="logout"></button>
+  <a href="index.html">🏠 Home</a>
   <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
   <h2 data-i18n="newTicket">New Ticket</h2>
   <form id="addForm">
     <textarea id="desc" data-i18n-placeholder="description" required></textarea>
-    <select id="deptSelect" required></select>
-    <select id="userSelect" required></select>
     <input type="text" id="room" data-i18n-placeholder="room" required />
     <button type="submit" data-i18n="submit">Add Ticket</button>
   </form>
@@ -196,9 +195,6 @@ async function loadStaffList(deptId, targetId='userSelect') {
   });
 }
 
-document.getElementById('deptSelect').addEventListener('change', e => {
-  loadStaffList(e.target.value);
-});
 document.getElementById('closeDept').addEventListener('change', e => {
   loadStaffList(e.target.value, 'closeUser');
 });
@@ -264,11 +260,11 @@ async function loadTickets() {
     const opened = ticket.openedAt ? new Date(ticket.openedAt).toLocaleString(currentLang) : '';
     const closed = ticket.closedAt ? new Date(ticket.closedAt).toLocaleString(currentLang) : '';
     const dept = departments.find(d => d.id === ticket.departmentId);
-    const openedBy = staff.find(s => s.id === ticket.openedBy);
+    const openedBy = ticket.openedBy;
     const closedBy = staff.find(s => s.id === ticket.closedBy);
     const statusClass = ticket.closedAt ? 'status-closed' : 'status-open';
     const statusText = ticket.closedAt ? t('closedStatus') : t('openStatus');
-    tr.innerHTML = `<td>${ticket.id}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${dept ? dept.name : ''}</td><td>${openedBy ? openedBy.name : ''}</td><td>${closedBy ? closedBy.name : ''}</td><td>${opened}</td><td>${closed}</td><td class="${statusClass}">${statusText}</td>`;
+    tr.innerHTML = `<td>${ticket.id}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${dept ? dept.name : ''}</td><td>${openedBy}</td><td>${closedBy ? closedBy.name : ''}</td><td>${opened}</td><td>${closed}</td><td class="${statusClass}">${statusText}</td>`;
     const actionTd = document.createElement('td');
     if (!ticket.closedAt) {
       const btn = document.createElement('button');
@@ -294,9 +290,8 @@ document.getElementById('addForm').addEventListener('submit', async e => {
   e.preventDefault();
   const body = {
     description: document.getElementById('desc').value,
-    departmentId: document.getElementById('deptSelect').value,
     room: document.getElementById('room').value,
-    openedBy: document.getElementById('userSelect').value
+    openedBy: currentUser.name
   };
   await fetch('/api/tickets', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   e.target.reset();
