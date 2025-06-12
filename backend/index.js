@@ -1,16 +1,33 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const cookieParser = require('cookie-parser');
+
 const TICKETS_FILE = path.join(__dirname, 'data', 'tickets.json');
 const DEPTS_FILE = path.join(__dirname, 'data', 'departments.json');
 const STAFF_FILE = path.join(__dirname, 'data', 'staff.json');
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Разрешаем статику из папки frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
+const sessions = {}; // token -> userId
+
 app.use(express.json());
+app.use(cookieParser());
+
+function authMiddleware(req, res, next) {
+  const token = req.cookies.token;
+  if (token && sessions[token]) {
+    const user = loadUsers().find(u => u.id === sessions[token]);
+    if (user) req.user = user;
+  }
+  next();
+}
+
+app.use(authMiddleware);
 
 function loadData(file) {
   try {
@@ -31,6 +48,56 @@ const loadDepartments = () => loadData(DEPTS_FILE);
 const saveDepartments = (d) => saveData(DEPTS_FILE, d);
 const loadStaff = () => loadData(STAFF_FILE);
 const saveStaff = (s) => saveData(STAFF_FILE, s);
+const loadUsers = () => loadData(USERS_FILE);
+const saveUsers = (u) => saveData(USERS_FILE, u);
+
+// Authentication
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body || {};
+  const users = loadUsers();
+  const user = users.find(u => u.username === username);
+  if (!user || !bcrypt.compareSync(password || '', user.password)) {
+    return res.status(401).json({ error: 'invalid' });
+  }
+  const token = crypto.randomBytes(16).toString('hex');
+  sessions[token] = user.id;
+  res.cookie('token', token, { httpOnly: true });
+  res.json({ id: user.id, username: user.username, name: user.name, role: user.role, departmentId: user.departmentId });
+});
+
+app.post('/api/logout', (req, res) => {
+  const token = req.cookies.token;
+  if (token) delete sessions[token];
+  res.clearCookie('token');
+  res.json({ ok: true });
+});
+
+app.get('/api/me', (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'unauthorized' });
+  const { id, username, name, role, departmentId } = req.user;
+  res.json({ id, username, name, role, departmentId });
+});
+
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  next();
+}
+
+const FRONTEND = path.join(__dirname, '../frontend');
+
+app.get('/app.html', (req, res) => {
+  if (!req.user) return res.redirect('/');
+  res.sendFile(path.join(FRONTEND, 'app.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+  if (!req.user || req.user.role !== 'admin') return res.redirect('/');
+  res.sendFile(path.join(FRONTEND, 'admin.html'));
+});
+
+app.use(express.static(FRONTEND));
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Сервер работает' });
@@ -81,6 +148,43 @@ app.delete('/api/staff/:id', (req, res) => {
   let staff = loadStaff();
   staff = staff.filter(s => s.id !== req.params.id);
   saveStaff(staff);
+  res.json({ ok: true });
+});
+
+// Users (admin only)
+app.get('/api/users', requireAdmin, (req, res) => {
+  res.json(loadUsers());
+});
+
+app.post('/api/users', requireAdmin, (req, res) => {
+  const users = loadUsers();
+  const body = req.body || {};
+  const user = {
+    id: 'u' + Date.now(),
+    username: body.username || '',
+    password: bcrypt.hashSync(body.password || '1234', 10),
+    role: body.role || 'user',
+    name: body.name || '',
+    departmentId: body.departmentId || ''
+  };
+  users.push(user);
+  saveUsers(users);
+  res.json(user);
+});
+
+app.delete('/api/users/:id', requireAdmin, (req, res) => {
+  let users = loadUsers();
+  users = users.filter(u => u.id !== req.params.id);
+  saveUsers(users);
+  res.json({ ok: true });
+});
+
+app.post('/api/users/:id/password', requireAdmin, (req, res) => {
+  const users = loadUsers();
+  const user = users.find(u => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: 'not found' });
+  user.password = bcrypt.hashSync(req.body.password || '1234', 10);
+  saveUsers(users);
   res.json({ ok: true });
 });
 
