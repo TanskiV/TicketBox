@@ -87,13 +87,17 @@ function requireAdmin(req, res, next) {
 
 const FRONTEND = path.join(__dirname, '../frontend');
 
-app.get('/app.html', (req, res) => {
-  if (!req.user) return res.redirect('/');
-  res.sendFile(path.join(FRONTEND, 'app.html'));
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
+});
+
+app.get('/index.html', (req, res) => {
+  if (!req.user) return res.redirect('/login.html');
+  res.sendFile(path.join(FRONTEND, 'index.html'));
 });
 
 app.get('/admin.html', (req, res) => {
-  if (!req.user || req.user.role !== 'admin') return res.redirect('/');
+  if (!req.user || req.user.role !== 'admin') return res.redirect('/login.html');
   res.sendFile(path.join(FRONTEND, 'admin.html'));
 });
 

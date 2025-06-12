@@ -57,13 +57,13 @@
 <script>
 let currentUser = null;
 async function requireLogin(){
-  const res = await fetch('/api/me');
-  if(!res.ok){
-    window.location.href = '/';
+  const stored = localStorage.getItem('user');
+  if(!stored){
+    window.location.href = '/login.html';
     return;
   }
-  const u = await res.json();
-  if(u.role !== 'admin') { window.location.href = '/'; return; }
+  const u = JSON.parse(stored);
+  if(u.role !== 'admin') { window.location.href = '/index.html'; return; }
   currentUser = u;
 }
 requireLogin();
@@ -173,7 +173,8 @@ document.getElementById('langToggle').addEventListener('click', () => {
 });
 document.getElementById('logout').addEventListener('click', async () => {
   await fetch('/api/logout', {method:'POST'});
-  window.location.href = '/';
+  localStorage.removeItem('user');
+  window.location.href = '/login.html';
 });
 
 async function loadDepartmentsList() {
