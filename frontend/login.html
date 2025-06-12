@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="title">TicketBox - Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <button id="langToggle"></button>
+  <h1 data-i18n="title">TicketBox - Login</h1>
+  <form id="loginForm">
+    <input type="text" id="username" data-i18n-placeholder="login" required />
+    <input type="password" id="password" data-i18n-placeholder="password" required />
+    <button type="submit" data-i18n="signIn">Login</button>
+  </form>
+  <div id="error"></div>
+<script>
+const translations = {
+  en: {
+    title: 'TicketBox - Login',
+    login: 'Login',
+    password: 'Password',
+    signIn: 'Login',
+    invalidCredentials: 'Invalid credentials',
+    logout: 'Logout',
+    changePassword: 'Change Password',
+    change: 'Change'
+  },
+  he: {
+    title: 'TicketBox - \u05DB\u05E0\u05D9\u05E1\u05D4',
+    login: '\u05E9\u05DD \u05DE\u05E9\u05EA\u05DE\u05E9',
+    password: '\u05E1\u05D9\u05E1\u05DE\u05D4',
+    signIn: '\u05DB\u05E0\u05D9\u05E1\u05D4',
+    invalidCredentials: '\u05E0\u05EA\u05D5\u05E0\u05D9\u05DD \u05E9\u05D2\u05D5\u05D9\u05DD',
+    logout: '\u05D9\u05E6\u05D9\u05D0\u05D4',
+    changePassword: '\u05E9\u05D9\u05E0\u05D5\u05D9 \u05E1\u05D9\u05E1\u05DE\u05D4',
+    change: '\u05E9\u05E0\u05D4'
+  }
+};
+
+let currentLang = 'en';
+
+function t(key) {
+  return translations[currentLang][key] || key;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.getElementById('langToggle').textContent = currentLang === 'he' ? '🇬🇧 English' : '🇮🇱 עברית';
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  applyTranslations();
+}
+
+function getLang() {
+  const stored = localStorage.getItem('lang');
+  if (stored) return stored;
+  return navigator.language && navigator.language.startsWith('he') ? 'he' : 'en';
+}
+
+document.getElementById('langToggle').addEventListener('click', () => {
+  setLang(currentLang === 'en' ? 'he' : 'en');
+});
+setLang(getLang());
+async function check(){
+  const stored = localStorage.getItem('user');
+  if(stored){
+    const u = JSON.parse(stored);
+    window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
+    return;
+  }
+  const res = await fetch('/api/me');
+  if(res.ok){
+    const u = await res.json();
+    localStorage.setItem('user', JSON.stringify(u));
+    window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
+  }
+}
+check();
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const body = {username: username.value, password: password.value};
+  const res = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  if(res.ok){
+    const u = await res.json();
+    localStorage.setItem('user', JSON.stringify(u));
+    window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
+  } else {
+    error.textContent = t('invalidCredentials');
+  }
+});
+</script>
+</body>
+</html>
