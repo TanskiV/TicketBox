@@ -10,6 +10,7 @@
 </head>
 <body>
   <button id="langToggle" style="float:right"></button>
+  <button id="logout" data-i18n="logout" style="float:right"></button>
   <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
   <h2 data-i18n="newTicket">New Ticket</h2>
@@ -89,6 +90,7 @@ const translations = {
     selectUser: 'Select User',
     manageDepartments: 'Manage Departments',
     manageStaff: 'Manage Staff',
+    logout: 'Logout',
     openStatus: 'Open',
       closedStatus: 'Closed',
       close: 'Close',
@@ -119,7 +121,8 @@ const translations = {
       selectDepartment: '\u05D1\u05D7\u05E8 \u05DE\u05D7\u05DC\u05E7\u05D4',
       selectUser: '\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3',
       manageDepartments: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05D7\u05DC\u05E7\u05D5\u05EA',
-      manageStaff: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD'
+      manageStaff: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD',
+      logout: '\u05D9\u05E6\u05D9\u05D0\u05D4'
     }
   };
 
@@ -158,6 +161,10 @@ function getLang() {
 
 document.getElementById('langToggle').addEventListener('click', () => {
   setLang(currentLang === 'en' ? 'he' : 'en');
+});
+document.getElementById('logout').addEventListener('click', async () => {
+  await fetch('/api/logout', {method:'POST'});
+  window.location.href = '/';
 });
 
 async function loadDepartmentsList() {

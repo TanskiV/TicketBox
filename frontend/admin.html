@@ -10,6 +10,7 @@
 </head>
 <body>
   <button id="langToggle" style="float:right"></button>
+  <button id="logout" data-i18n="logout" style="float:right"></button>
   <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
 
@@ -30,8 +31,8 @@
 
   <h2 data-i18n="manageUsers">Manage Users</h2>
   <form id="userForm">
-    <input type="text" id="newUsername" placeholder="login" required />
-    <input type="password" id="newPassword" placeholder="password" required />
+    <input type="text" id="newUsername" data-i18n-placeholder="login" required />
+    <input type="password" id="newPassword" data-i18n-placeholder="password" required />
     <input type="text" id="newName" placeholder="name" required />
     <select id="userDept"></select>
     <select id="userRole">
@@ -41,6 +42,12 @@
     <button type="submit" data-i18n="submit">Add</button>
   </form>
   <ul id="userList"></ul>
+
+  <h2 data-i18n="changePassword">Change Password</h2>
+  <form id="passwordForm">
+    <input type="password" id="adminPassword" data-i18n-placeholder="password" required />
+    <button type="submit" data-i18n="change">Change</button>
+  </form>
 
 <script>
 let currentUser = null;
@@ -77,6 +84,11 @@ const translations = {
     manageDepartments: 'Manage Departments',
     manageStaff: 'Manage Staff',
     manageUsers: 'Manage Users',
+    login: 'Login',
+    password: 'Password',
+    changePassword: 'Change Password',
+    logout: 'Logout',
+    change: 'Change',
     openStatus: 'Open',
       closedStatus: 'Closed',
       close: 'Close',
@@ -108,7 +120,12 @@ const translations = {
       selectUser: '\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3',
       manageDepartments: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05D7\u05DC\u05E7\u05D5\u05EA',
       manageStaff: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD',
-      manageUsers: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05E9\u05EA\u05DE\u05E9\u05D9\u05DD'
+      manageUsers: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05E9\u05EA\u05DE\u05E9\u05D9\u05DD',
+      login: '\u05E9\u05DD \u05DE\u05E9\u05EA\u05DE\u05E9',
+      password: '\u05E1\u05D9\u05E1\u05DE\u05D4',
+      changePassword: '\u05E9\u05D9\u05E0\u05D5\u05D9 \u05E1\u05D9\u05E1\u05DE\u05D4',
+      logout: '\u05D9\u05E6\u05D9\u05D0\u05D4',
+      change: '\u05E9\u05E0\u05D4'
     }
   };
 
@@ -148,6 +165,10 @@ function getLang() {
 
 document.getElementById('langToggle').addEventListener('click', () => {
   setLang(currentLang === 'en' ? 'he' : 'en');
+});
+document.getElementById('logout').addEventListener('click', async () => {
+  await fetch('/api/logout', {method:'POST'});
+  window.location.href = '/';
 });
 
 async function loadDepartmentsList() {
@@ -313,6 +334,19 @@ if (userForm) {
     await fetch('/api/users', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     e.target.reset();
     loadUsersList();
+  });
+}
+
+const passwordForm = document.getElementById('passwordForm');
+if (passwordForm) {
+  passwordForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    await fetch(`/api/users/${currentUser.id}/password`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ password: document.getElementById('adminPassword').value })
+    });
+    e.target.reset();
   });
 }
 
