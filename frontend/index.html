@@ -3,9 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <title>TicketBox</title>
+  <style>
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 4px; }
+    form { margin-bottom: 1em; }
+  </style>
 </head>
 <body>
-  <h1>Система учёта поломок – TicketBox</h1>
-  <p>Добро пожаловать. Это стартовая страница.</p>
+  <h1>TicketBox</h1>
+
+  <h2>Новая заявка</h2>
+  <form id="addForm">
+    <input type="text" id="desc" placeholder="Описание" required />
+    <input type="text" id="dept" placeholder="Подразделение" required />
+    <input type="text" id="room" placeholder="Комната" required />
+    <input type="text" id="user" placeholder="Пользователь" required />
+    <button type="submit">Добавить</button>
+  </form>
+
+  <h2>Список заявок</h2>
+  <label>Фильтр по комнате: <input type="text" id="filterRoom" /></label>
+  <button onclick="loadTickets()">Обновить</button>
+  <table id="tickets">
+    <thead>
+      <tr><th>ID</th><th>Описание</th><th>Комната</th><th>Подразделение</th><th>Пользователь</th><th>Статус</th><th>Действия</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+async function loadTickets() {
+  const room = document.getElementById('filterRoom').value;
+  const params = room ? '?room=' + encodeURIComponent(room) : '';
+  const res = await fetch('/api/tickets' + params);
+  const data = await res.json();
+  const tbody = document.querySelector('#tickets tbody');
+  tbody.innerHTML = '';
+  data.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td><td>${t.department}</td><td>${t.user}</td><td>${t.closedAt ? 'закрыта' : 'открыта'}</td>`;
+    const actionTd = document.createElement('td');
+    if (!t.closedAt) {
+      const btn = document.createElement('button');
+      btn.textContent = 'Закрыть';
+      btn.onclick = () => closeTicket(t.id);
+      actionTd.appendChild(btn);
+    }
+    tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+  });
+}
+
+async function closeTicket(id) {
+  await fetch(`/api/tickets/${id}/close`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user: 'admin'})});
+  loadTickets();
+}
+
+document.getElementById('addForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const body = {
+    description: document.getElementById('desc').value,
+    department: document.getElementById('dept').value,
+    room: document.getElementById('room').value,
+    user: document.getElementById('user').value
+  };
+  await fetch('/api/tickets', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  e.target.reset();
+  loadTickets();
+});
+
+loadTickets();
+</script>
 </body>
 </html>
