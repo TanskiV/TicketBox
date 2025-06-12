@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title data-i18n="title">TicketBox - Login</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <button id="langToggle" style="float:right"></button>
+  <button id="langToggle"></button>
+  <h1 data-i18n="title">TicketBox - Login</h1>
   <form id="loginForm">
     <input type="text" id="username" data-i18n-placeholder="login" required />
     <input type="password" id="password" data-i18n-placeholder="password" required />
     <button type="submit" data-i18n="signIn">Login</button>
   </form>
-  <div id="error" style="color:red"></div>
+  <div id="error"></div>
 <script>
 const translations = {
   en: {
