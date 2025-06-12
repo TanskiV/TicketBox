@@ -1,36 +1,119 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>TicketBox</title>
+  <title data-i18n="title">TicketBox - Fault Management</title>
   <style>
     table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 4px; }
     form { margin-bottom: 1em; }
   </style>
 </head>
 <body>
-  <h1>TicketBox</h1>
+  <button id="langToggle" style="float:right"></button>
+  <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
-  <h2>Новая заявка</h2>
+  <h2 data-i18n="newTicket">New Ticket</h2>
   <form id="addForm">
-    <input type="text" id="desc" placeholder="Описание" required />
-    <input type="text" id="dept" placeholder="Подразделение" required />
-    <input type="text" id="room" placeholder="Комната" required />
-    <input type="text" id="user" placeholder="Пользователь" required />
-    <button type="submit">Добавить</button>
+    <input type="text" id="desc" data-i18n-placeholder="description" required />
+    <input type="text" id="dept" data-i18n-placeholder="department" required />
+    <input type="text" id="room" data-i18n-placeholder="room" required />
+    <input type="text" id="user" data-i18n-placeholder="user" required />
+    <button type="submit" data-i18n="submit">Add Ticket</button>
   </form>
 
-  <h2>Список заявок</h2>
-  <label>Фильтр по комнате: <input type="text" id="filterRoom" /></label>
-  <button onclick="loadTickets()">Обновить</button>
+  <h2 data-i18n="tickets">Tickets</h2>
+  <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" /></label>
+  <button onclick="loadTickets()" data-i18n="refresh">Refresh</button>
   <table id="tickets">
     <thead>
-      <tr><th>ID</th><th>Описание</th><th>Комната</th><th>Подразделение</th><th>Пользователь</th><th>Статус</th><th>Действия</th></tr>
+      <tr>
+        <th data-i18n="id">ID</th>
+        <th data-i18n="description">Description</th>
+        <th data-i18n="room">Room</th>
+        <th data-i18n="department">Department</th>
+        <th data-i18n="user">User</th>
+        <th data-i18n="status">Status</th>
+        <th data-i18n="actions">Actions</th>
+      </tr>
     </thead>
     <tbody></tbody>
   </table>
 
 <script>
+const translations = {
+  en: {
+    title: 'TicketBox - Fault Management',
+    newTicket: 'New Ticket',
+    description: 'Description',
+    department: 'Department',
+    room: 'Room',
+    user: 'User',
+    submit: 'Add Ticket',
+    tickets: 'Tickets',
+    filterRoom: 'Filter by room',
+    refresh: 'Refresh',
+    id: 'ID',
+    status: 'Status',
+    actions: 'Actions',
+    openStatus: 'Open',
+    closedStatus: 'Closed',
+    close: 'Close'
+  },
+  he: {
+    title: 'TicketBox - \u05DE\u05E2\u05E8\u05DB\u05EA \u05DC\u05E0\u05D9\u05D4\u05D5\u05DC \u05EA\u05E7\u05DC\u05D5\u05EA',
+    newTicket: '\u05EA\u05E7\u05DC\u05D4 \u05D7\u05D3\u05E9\u05D4',
+    description: '\u05EA\u05D9\u05D0\u05D5\u05E8',
+    department: '\u05DE\u05D7\u05DC\u05E7\u05D4',
+    room: '\u05D7\u05D3\u05E8',
+    user: '\u05DE\u05E9\u05EA\u05DE\u05E9',
+    submit: '\u05D4\u05D5\u05E1\u05E3 \u05EA\u05E7\u05DC\u05D4',
+    tickets: '\u05E8\u05E9\u05D9\u05DE\u05EA \u05EA\u05E7\u05DC\u05D5\u05EA',
+    filterRoom: '\u05E1\u05D9\u05E0\u05D5\u05DF \u05DC\u05E4\u05D9 \u05D7\u05D3\u05E8',
+    refresh: '\u05E8\u05E2\u05E0\u05DF',
+    id: '\u05DE\u05D6\u05D4\u05D4',
+    status: '\u05E1\u05D8\u05D8\u05D5\u05E1',
+    actions: '\u05E4\u05E2\u05D5\u05DC\u05D5\u05EA',
+    openStatus: '\u05E4\u05EA\u05D5\u05D7\u05D4',
+    closedStatus: '\u05E1\u05D2\u05D5\u05E8\u05D4',
+    close: '\u05E1\u05D2\u05D5\u05E8'
+  }
+};
+
+let currentLang = 'en';
+
+function t(key) {
+  return translations[currentLang][key] || key;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.getElementById('langToggle').textContent = currentLang === 'he' ? '🇬🇧 English' : '🇮🇱 עברית';
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  applyTranslations();
+  loadTickets();
+}
+
+function getLang() {
+  const stored = localStorage.getItem('lang');
+  if (stored) return stored;
+  return navigator.language && navigator.language.startsWith('he') ? 'he' : 'en';
+}
+
+document.getElementById('langToggle').addEventListener('click', () => {
+  setLang(currentLang === 'en' ? 'he' : 'en');
+});
+
 async function loadTickets() {
   const room = document.getElementById('filterRoom').value;
   const params = room ? '?room=' + encodeURIComponent(room) : '';
@@ -40,11 +123,11 @@ async function loadTickets() {
   tbody.innerHTML = '';
   data.forEach(t => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td><td>${t.department}</td><td>${t.user}</td><td>${t.closedAt ? 'закрыта' : 'открыта'}</td>`;
+    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td><td>${t.department}</td><td>${t.user}</td><td>${t.closedAt ? t('closedStatus') : t('openStatus')}</td>`;
     const actionTd = document.createElement('td');
     if (!t.closedAt) {
       const btn = document.createElement('button');
-      btn.textContent = 'Закрыть';
+      btn.textContent = t('close');
       btn.onclick = () => closeTicket(t.id);
       actionTd.appendChild(btn);
     }
@@ -71,7 +154,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
   loadTickets();
 });
 
-loadTickets();
+setLang(getLang());
 </script>
 </body>
 </html>
