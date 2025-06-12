@@ -53,7 +53,7 @@ app.post('/api/tickets', (req, res) => {
     department: body.department || '',
     room: body.room || '',
     user: body.user || '',
-    createdAt: new Date().toISOString(),
+    openedAt: new Date().toISOString(),
     closedAt: null,
     closedBy: null,
     comment: ''

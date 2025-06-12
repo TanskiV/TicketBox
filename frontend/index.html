@@ -32,6 +32,8 @@
         <th data-i18n="room">Room</th>
         <th data-i18n="department">Department</th>
         <th data-i18n="user">User</th>
+        <th data-i18n="openedAt">Opened at</th>
+        <th data-i18n="closedAt">Closed at</th>
         <th data-i18n="status">Status</th>
         <th data-i18n="actions">Actions</th>
       </tr>
@@ -56,10 +58,12 @@ const translations = {
     status: 'Status',
     actions: 'Actions',
     openStatus: 'Open',
-    closedStatus: 'Closed',
-    close: 'Close'
-  },
-  he: {
+      closedStatus: 'Closed',
+      close: 'Close',
+      openedAt: 'Opened at',
+      closedAt: 'Closed at'
+    },
+    he: {
     title: 'TicketBox - \u05DE\u05E2\u05E8\u05DB\u05EA \u05DC\u05E0\u05D9\u05D4\u05D5\u05DC \u05EA\u05E7\u05DC\u05D5\u05EA',
     newTicket: '\u05EA\u05E7\u05DC\u05D4 \u05D7\u05D3\u05E9\u05D4',
     description: '\u05EA\u05D9\u05D0\u05D5\u05E8',
@@ -74,10 +78,12 @@ const translations = {
     status: '\u05E1\u05D8\u05D8\u05D5\u05E1',
     actions: '\u05E4\u05E2\u05D5\u05DC\u05D5\u05EA',
     openStatus: '\u05E4\u05EA\u05D5\u05D7\u05D4',
-    closedStatus: '\u05E1\u05D2\u05D5\u05E8\u05D4',
-    close: '\u05E1\u05D2\u05D5\u05E8'
-  }
-};
+      closedStatus: '\u05E1\u05D2\u05D5\u05E8\u05D4',
+      close: '\u05E1\u05D2\u05D5\u05E8',
+      openedAt: '\u05EA\u05D0\u05E8\u05D9\u05DA \u05E4\u05EA\u05D9\u05D7\u05D4',
+      closedAt: '\u05EA\u05D0\u05E8\u05D9\u05DA \u05E1\u05D2\u05D9\u05E8\u05D4'
+    }
+  };
 
 let currentLang = 'en';
 
@@ -121,14 +127,16 @@ async function loadTickets() {
   const data = await res.json();
   const tbody = document.querySelector('#tickets tbody');
   tbody.innerHTML = '';
-  data.forEach(t => {
+  data.forEach(ticket => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td><td>${t.department}</td><td>${t.user}</td><td>${t.closedAt ? t('closedStatus') : t('openStatus')}</td>`;
+    const opened = ticket.openedAt ? new Date(ticket.openedAt).toLocaleString() : '';
+    const closed = ticket.closedAt ? new Date(ticket.closedAt).toLocaleString() : '';
+    tr.innerHTML = `<td>${ticket.id}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${ticket.department}</td><td>${ticket.user}</td><td>${opened}</td><td>${closed}</td><td>${ticket.closedAt ? t('closedStatus') : t('openStatus')}</td>`;
     const actionTd = document.createElement('td');
-    if (!t.closedAt) {
+    if (!ticket.closedAt) {
       const btn = document.createElement('button');
       btn.textContent = t('close');
-      btn.onclick = () => closeTicket(t.id);
+      btn.onclick = () => closeTicket(ticket.id);
       actionTd.appendChild(btn);
     }
     tr.appendChild(actionTd);
