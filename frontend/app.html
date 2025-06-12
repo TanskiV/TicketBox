@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title data-i18n="title">TicketBox - Fault Management</title>
-  <style>
-    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 4px; }
-    form { margin-bottom: 1em; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <button id="langToggle" style="float:right"></button>
-  <button id="logout" data-i18n="logout" style="float:right"></button>
+  <button id="langToggle"></button>
+  <button id="logout" data-i18n="logout"></button>
   <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
   <h2 data-i18n="newTicket">New Ticket</h2>
@@ -268,7 +265,9 @@ async function loadTickets() {
     const dept = departments.find(d => d.id === ticket.departmentId);
     const openedBy = staff.find(s => s.id === ticket.openedBy);
     const closedBy = staff.find(s => s.id === ticket.closedBy);
-    tr.innerHTML = `<td>${ticket.id}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${dept ? dept.name : ''}</td><td>${openedBy ? openedBy.name : ''}</td><td>${closedBy ? closedBy.name : ''}</td><td>${opened}</td><td>${closed}</td><td>${ticket.closedAt ? t('closedStatus') : t('openStatus')}</td>`;
+    const statusClass = ticket.closedAt ? 'status-closed' : 'status-open';
+    const statusText = ticket.closedAt ? t('closedStatus') : t('openStatus');
+    tr.innerHTML = `<td>${ticket.id}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${dept ? dept.name : ''}</td><td>${openedBy ? openedBy.name : ''}</td><td>${closedBy ? closedBy.name : ''}</td><td>${opened}</td><td>${closed}</td><td class="${statusClass}">${statusText}</td>`;
     const actionTd = document.createElement('td');
     if (!ticket.closedAt) {
       const btn = document.createElement('button');

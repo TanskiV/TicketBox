@@ -3,51 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <title data-i18n="title">TicketBox - Fault Management</title>
-  <style>
-    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 4px; }
-    form { margin-bottom: 1em; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <button id="langToggle" style="float:right"></button>
-  <button id="logout" data-i18n="logout" style="float:right"></button>
+  <button id="langToggle"></button>
+  <button id="logout" data-i18n="logout"></button>
   <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
 
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
-  <form id="deptForm">
-    <input type="text" id="newDept" required />
-    <button type="submit" data-i18n="submit">Add</button>
-  </form>
-  <ul id="deptList"></ul>
+  <div class="panel">
+    <form id="deptForm">
+      <input type="text" id="newDept" required />
+      <button type="submit" data-i18n="submit">Add</button>
+    </form>
+    <ul id="deptList"></ul>
+  </div>
 
   <h2 data-i18n="manageStaff">Manage Staff</h2>
-  <form id="staffForm">
-    <input type="text" id="newStaff" required />
-    <select id="staffDept"></select>
-    <button type="submit" data-i18n="submit">Add</button>
-  </form>
-  <ul id="staffList"></ul>
+  <div class="panel">
+    <form id="staffForm">
+      <input type="text" id="newStaff" required />
+      <select id="staffDept"></select>
+      <button type="submit" data-i18n="submit">Add</button>
+    </form>
+    <ul id="staffList"></ul>
+  </div>
 
   <h2 data-i18n="manageUsers">Manage Users</h2>
-  <form id="userForm">
-    <input type="text" id="newUsername" data-i18n-placeholder="login" required />
-    <input type="password" id="newPassword" data-i18n-placeholder="password" required />
-    <input type="text" id="newName" placeholder="name" required />
-    <select id="userDept"></select>
-    <select id="userRole">
-      <option value="user">User</option>
-      <option value="admin">Admin</option>
-    </select>
-    <button type="submit" data-i18n="submit">Add</button>
-  </form>
-  <ul id="userList"></ul>
+  <div class="panel">
+    <form id="userForm">
+      <input type="text" id="newUsername" data-i18n-placeholder="login" required />
+      <input type="password" id="newPassword" data-i18n-placeholder="password" required />
+      <input type="text" id="newName" placeholder="name" required />
+      <select id="userDept"></select>
+      <select id="userRole">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit" data-i18n="submit">Add</button>
+    </form>
+    <ul id="userList"></ul>
+  </div>
 
   <h2 data-i18n="changePassword">Change Password</h2>
-  <form id="passwordForm">
-    <input type="password" id="adminPassword" data-i18n-placeholder="password" required />
-    <button type="submit" data-i18n="change">Change</button>
-  </form>
+  <div class="panel">
+    <form id="passwordForm">
+      <input type="password" id="adminPassword" data-i18n-placeholder="password" required />
+      <button type="submit" data-i18n="change">Change</button>
+    </form>
+  </div>
 
 <script>
 let currentUser = null;
