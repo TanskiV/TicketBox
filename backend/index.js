@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const DATA_FILE = path.join(__dirname, 'data', 'tickets.json');
+const TICKETS_FILE = path.join(__dirname, 'data', 'tickets.json');
+const DEPTS_FILE = path.join(__dirname, 'data', 'departments.json');
+const STAFF_FILE = path.join(__dirname, 'data', 'staff.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,21 +12,76 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.use(express.json());
 
-function loadTickets() {
+function loadData(file) {
   try {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
+    const data = fs.readFileSync(file, 'utf-8');
     return JSON.parse(data);
   } catch (e) {
     return [];
   }
 }
 
-function saveTickets(tickets) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(tickets, null, 2));
+function saveData(file, data) {
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
+
+const loadTickets = () => loadData(TICKETS_FILE);
+const saveTickets = (tickets) => saveData(TICKETS_FILE, tickets);
+const loadDepartments = () => loadData(DEPTS_FILE);
+const saveDepartments = (d) => saveData(DEPTS_FILE, d);
+const loadStaff = () => loadData(STAFF_FILE);
+const saveStaff = (s) => saveData(STAFF_FILE, s);
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Сервер работает' });
+});
+
+// Departments
+app.get('/api/departments', (req, res) => {
+  res.json(loadDepartments());
+});
+
+app.post('/api/departments', (req, res) => {
+  const depts = loadDepartments();
+  const dept = { id: 'd' + Date.now(), name: req.body.name || '' };
+  depts.push(dept);
+  saveDepartments(depts);
+  res.json(dept);
+});
+
+app.delete('/api/departments/:id', (req, res) => {
+  let depts = loadDepartments();
+  depts = depts.filter(d => d.id !== req.params.id);
+  saveDepartments(depts);
+  res.json({ ok: true });
+});
+
+// Staff
+app.get('/api/staff', (req, res) => {
+  let staff = loadStaff();
+  if (req.query.departmentId) {
+    staff = staff.filter(s => s.departmentId === req.query.departmentId);
+  }
+  res.json(staff);
+});
+
+app.post('/api/staff', (req, res) => {
+  const staff = loadStaff();
+  const member = {
+    id: 'u' + Date.now(),
+    name: req.body.name || '',
+    departmentId: req.body.departmentId || ''
+  };
+  staff.push(member);
+  saveStaff(staff);
+  res.json(member);
+});
+
+app.delete('/api/staff/:id', (req, res) => {
+  let staff = loadStaff();
+  staff = staff.filter(s => s.id !== req.params.id);
+  saveStaff(staff);
+  res.json({ ok: true });
 });
 
 // Получить список заявок с фильтрацией
@@ -37,8 +94,8 @@ app.get('/api/tickets', (req, res) => {
   if (req.query.room) {
     tickets = tickets.filter(t => t.room === req.query.room);
   }
-  if (req.query.department) {
-    tickets = tickets.filter(t => t.department === req.query.department);
+  if (req.query.departmentId) {
+    tickets = tickets.filter(t => t.departmentId === req.query.departmentId);
   }
   res.json(tickets);
 });
@@ -50,9 +107,9 @@ app.post('/api/tickets', (req, res) => {
   const ticket = {
     id: Date.now().toString(),
     description: body.description || '',
-    department: body.department || '',
+    departmentId: body.departmentId || '',
     room: body.room || '',
-    user: body.user || '',
+    openedBy: body.openedBy || '',
     openedAt: new Date().toISOString(),
     closedAt: null,
     closedBy: null,
@@ -72,7 +129,7 @@ app.post('/api/tickets/:id/close', (req, res) => {
   }
   if (!ticket.closedAt) {
     ticket.closedAt = new Date().toISOString();
-    ticket.closedBy = req.body.user || '';
+    ticket.closedBy = req.body.userId || '';
     ticket.comment = req.body.comment || '';
     saveTickets(tickets);
   }
