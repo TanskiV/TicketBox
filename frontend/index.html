@@ -194,7 +194,6 @@ function renderDeptList() {
 
 async function loadTickets() {
   await loadDepartmentsList();
-  await loadStaffList();
   const room = document.getElementById('filterRoom').value;
   const params = room ? '?room=' + encodeURIComponent(room) : '';
   const res = await fetch('/api/tickets' + params);
@@ -235,14 +234,37 @@ async function closeTicket(id) {
 
 document.getElementById('addForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const body = {
-    description: document.getElementById('desc').value,
-    room: document.getElementById('room').value,
-    openedBy: currentUser.username
-  };
-  await fetch('/api/tickets', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-  e.target.reset();
-  loadTickets();
+  if (!currentUser || !currentUser.username) {
+    alert('Not logged in');
+    return;
+  }
+  const description = document.getElementById('desc').value.trim();
+  const room = document.getElementById('room').value.trim();
+  if (!description || !room) {
+    alert('Fill all fields');
+    return;
+  }
+  const body = { description, room, openedBy: currentUser.username };
+  console.log('Sending ticket', body);
+  try {
+    const res = await fetch('/api/tickets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Server error' }));
+      alert(err.error || 'Server error');
+      return;
+    }
+    const saved = await res.json();
+    console.log('Ticket saved', saved);
+    e.target.reset();
+    loadTickets();
+  } catch (err) {
+    console.log(err);
+    alert('Server error');
+  }
 });
 
 setLang(getLang());
