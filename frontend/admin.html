@@ -22,29 +22,12 @@
     <ul id="deptList"></ul>
   </div>
 
-  <h2 data-i18n="manageStaff">Manage Staff</h2>
-  <div class="panel">
-    <h3>Add Staff Member</h3>
-    <form id="staffForm">
-      <input type="text" id="newStaff" required />
-      <select id="staffDept"></select>
-      <button type="submit" data-i18n="submit">Add</button>
-    </form>
-    <table id="staffList" class="table-staff">
-      <thead>
-        <tr><th>Name</th><th>Department</th><th></th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
   <h2 data-i18n="manageUsers">Manage Users</h2>
   <div class="panel">
     <h3>Add User (Login Access)</h3>
     <form id="userForm">
       <input type="text" id="newUsername" data-i18n-placeholder="login" required />
       <input type="password" id="newPassword" data-i18n-placeholder="password" required />
-      <input type="text" id="newName" placeholder="name" required />
       <select id="userDept"></select>
       <select id="userRole">
         <option value="user">User</option>
@@ -54,7 +37,7 @@
     </form>
     <table id="userList" class="table-users">
       <thead>
-        <tr><th>Login</th><th>Name</th><th>Role</th><th>Department</th><th></th></tr>
+        <tr><th>Login</th><th>Role</th><th>Department</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -102,7 +85,6 @@ const translations = {
     selectDepartment: 'Select Department',
     selectUser: 'Select User',
     manageDepartments: 'Manage Departments',
-    manageStaff: 'Manage Staff',
     manageUsers: 'Manage Users',
     login: 'Login',
     password: 'Password',
@@ -139,7 +121,6 @@ const translations = {
       selectDepartment: '\u05D1\u05D7\u05E8 \u05DE\u05D7\u05DC\u05E7\u05D4',
       selectUser: '\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3',
       manageDepartments: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05D7\u05DC\u05E7\u05D5\u05EA',
-      manageStaff: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD',
       manageUsers: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05E9\u05EA\u05DE\u05E9\u05D9\u05DD',
       login: '\u05E9\u05DD \u05DE\u05E9\u05EA\u05DE\u05E9',
       password: '\u05E1\u05D9\u05E1\u05DE\u05D4',
@@ -151,7 +132,6 @@ const translations = {
 
 let currentLang = 'en';
 let departments = [];
-let staff = [];
 
 function t(key) {
   return translations[currentLang][key] || key;
@@ -173,8 +153,7 @@ function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('lang', lang);
   applyTranslations();
-  loadTickets();
-  loadUsersList();
+  refreshDepartments();
 }
 
 function getLang() {
@@ -208,27 +187,11 @@ async function loadDepartmentsList() {
   renderDeptList();
 }
 
-async function loadStaffList(deptId, targetId='userSelect') {
-  const res = await fetch('/api/staff' + (deptId ? `?departmentId=${deptId}` : ''));
-  const data = await res.json();
-  if (!deptId) { staff = data; renderStaffList(); return; }
-  const select = document.getElementById(targetId);
-  if (!select) return;
-  select.innerHTML = `<option value="">${t('selectUser')}</option>`;
-  data.forEach(u => {
-    const opt = document.createElement('option');
-    opt.value = u.id;
-    opt.textContent = u.name;
-    select.appendChild(opt);
-  });
+async function refreshDepartments() {
+  await loadDepartmentsList();
+  loadUsersList();
 }
 
-document.getElementById('deptSelect').addEventListener('change', e => {
-  loadStaffList(e.target.value);
-});
-document.getElementById('closeDept').addEventListener('change', e => {
-  loadStaffList(e.target.value, 'closeUser');
-});
 
 function renderDeptList() {
   const ul = document.getElementById('deptList');
@@ -241,41 +204,10 @@ function renderDeptList() {
     del.textContent = 'x';
     del.onclick = async () => {
       await fetch(`/api/departments/${d.id}`, {method:'DELETE'});
-      loadTickets();
+      refreshDepartments();
     };
     li.appendChild(del);
     ul.appendChild(li);
-  });
-  const staffDept = document.getElementById('staffDept');
-  if (staffDept) {
-    staffDept.innerHTML = '';
-    departments.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d.id;
-      opt.textContent = d.name;
-      staffDept.appendChild(opt);
-    });
-  }
-}
-
-function renderStaffList() {
-  const tbody = document.querySelector('#staffList tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  staff.forEach(s => {
-    const tr = document.createElement('tr');
-    const dept = departments.find(d => d.id === s.departmentId);
-    tr.innerHTML = `<td>${s.name}</td><td>${dept ? dept.name : ''}</td>`;
-    const td = document.createElement('td');
-    const del = document.createElement('button');
-    del.textContent = 'x';
-    del.onclick = async () => {
-      await fetch(`/api/staff/${s.id}`, {method:'DELETE'});
-      loadTickets();
-    };
-    td.appendChild(del);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
   });
 }
 
@@ -304,7 +236,7 @@ function renderUserList() {
   users.forEach(u => {
     const tr = document.createElement('tr');
     const dept = departments.find(d => d.id === u.departmentId);
-    tr.innerHTML = `<td>${u.username}</td><td>${u.name}</td><td>${u.role}</td><td>${dept ? dept.name : ''}</td>`;
+    tr.innerHTML = `<td>${u.username}</td><td>${u.role}</td><td>${dept ? dept.name : ''}</td>`;
     const td = document.createElement('td');
     const del = document.createElement('button');
     del.textContent = 'x';
@@ -318,12 +250,6 @@ function renderUserList() {
   });
 }
 
-async function loadTickets() {
-  await loadDepartmentsList();
-  await loadStaffList();
-}
-
-
 setLang(getLang());
 loadUsersList();
 
@@ -331,18 +257,7 @@ document.getElementById('deptForm').addEventListener('submit', async e => {
   e.preventDefault();
   await fetch('/api/departments', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('newDept').value})});
   e.target.reset();
-  loadTickets();
-});
-
-document.getElementById('staffForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const body = {
-    name: document.getElementById('newStaff').value,
-    departmentId: document.getElementById('staffDept').value
-  };
-  await fetch('/api/staff', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-  e.target.reset();
-  loadTickets();
+  refreshDepartments();
 });
 
 const userForm = document.getElementById('userForm');
@@ -352,7 +267,6 @@ if (userForm) {
     const body = {
       username: document.getElementById('newUsername').value,
       password: document.getElementById('newPassword').value,
-      name: document.getElementById('newName').value,
       departmentId: document.getElementById('userDept').value,
       role: document.getElementById('userRole').value
     };
