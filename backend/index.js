@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 
 const TICKETS_FILE = path.join(__dirname, 'data', 'tickets.json');
 const DEPTS_FILE = path.join(__dirname, 'data', 'departments.json');
-const STAFF_FILE = path.join(__dirname, 'data', 'staff.json');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
 const app = express();
@@ -46,8 +45,6 @@ const loadTickets = () => loadData(TICKETS_FILE);
 const saveTickets = (tickets) => saveData(TICKETS_FILE, tickets);
 const loadDepartments = () => loadData(DEPTS_FILE);
 const saveDepartments = (d) => saveData(DEPTS_FILE, d);
-const loadStaff = () => loadData(STAFF_FILE);
-const saveStaff = (s) => saveData(STAFF_FILE, s);
 const loadUsers = () => loadData(USERS_FILE);
 const saveUsers = (u) => saveData(USERS_FILE, u);
 
@@ -62,7 +59,7 @@ app.post('/api/login', (req, res) => {
   const token = crypto.randomBytes(16).toString('hex');
   sessions[token] = user.id;
   res.cookie('token', token, { httpOnly: true });
-  res.json({ id: user.id, username: user.username, name: user.name, role: user.role, departmentId: user.departmentId });
+  res.json({ id: user.id, username: user.username, role: user.role, departmentId: user.departmentId });
 });
 
 app.post('/api/logout', (req, res) => {
@@ -74,8 +71,8 @@ app.post('/api/logout', (req, res) => {
 
 app.get('/api/me', (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'unauthorized' });
-  const { id, username, name, role, departmentId } = req.user;
-  res.json({ id, username, name, role, departmentId });
+  const { id, username, role, departmentId } = req.user;
+  res.json({ id, username, role, departmentId });
 });
 
 function requireAdmin(req, res, next) {
@@ -130,33 +127,6 @@ app.delete('/api/departments/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// Staff
-app.get('/api/staff', (req, res) => {
-  let staff = loadStaff();
-  if (req.query.departmentId) {
-    staff = staff.filter(s => s.departmentId === req.query.departmentId);
-  }
-  res.json(staff);
-});
-
-app.post('/api/staff', (req, res) => {
-  const staff = loadStaff();
-  const member = {
-    id: 'u' + Date.now(),
-    name: req.body.name || '',
-    departmentId: req.body.departmentId || ''
-  };
-  staff.push(member);
-  saveStaff(staff);
-  res.json(member);
-});
-
-app.delete('/api/staff/:id', (req, res) => {
-  let staff = loadStaff();
-  staff = staff.filter(s => s.id !== req.params.id);
-  saveStaff(staff);
-  res.json({ ok: true });
-});
 
 // Users (admin only)
 app.get('/api/users', requireAdmin, (req, res) => {
@@ -171,7 +141,6 @@ app.post('/api/users', requireAdmin, (req, res) => {
     username: body.username || '',
     password: bcrypt.hashSync(body.password || '1234', 10),
     role: body.role || 'user',
-    name: body.name || '',
     departmentId: body.departmentId || ''
   };
   users.push(user);
