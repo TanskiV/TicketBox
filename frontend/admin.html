@@ -14,6 +14,7 @@
 
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
   <div class="panel">
+    <h3>Add New Department</h3>
     <form id="deptForm">
       <input type="text" id="newDept" required />
       <button type="submit" data-i18n="submit">Add</button>
@@ -23,16 +24,23 @@
 
   <h2 data-i18n="manageStaff">Manage Staff</h2>
   <div class="panel">
+    <h3>Add Staff Member</h3>
     <form id="staffForm">
       <input type="text" id="newStaff" required />
       <select id="staffDept"></select>
       <button type="submit" data-i18n="submit">Add</button>
     </form>
-    <ul id="staffList"></ul>
+    <table id="staffList" class="table-staff">
+      <thead>
+        <tr><th>Name</th><th>Department</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <h2 data-i18n="manageUsers">Manage Users</h2>
   <div class="panel">
+    <h3>Add User (Login Access)</h3>
     <form id="userForm">
       <input type="text" id="newUsername" data-i18n-placeholder="login" required />
       <input type="password" id="newPassword" data-i18n-placeholder="password" required />
@@ -44,13 +52,19 @@
       </select>
       <button type="submit" data-i18n="submit">Add</button>
     </form>
-    <ul id="userList"></ul>
+    <table id="userList" class="table-users">
+      <thead>
+        <tr><th>Login</th><th>Name</th><th>Role</th><th>Department</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <h2 data-i18n="changePassword">Change Password</h2>
   <div class="panel">
+    <h3>Change Password</h3>
     <form id="passwordForm">
-      <input type="password" id="adminPassword" data-i18n-placeholder="password" required />
+      <input type="password" id="adminPassword" placeholder="New Password" required />
       <button type="submit" data-i18n="change">Change</button>
     </form>
   </div>
@@ -245,21 +259,23 @@ function renderDeptList() {
 }
 
 function renderStaffList() {
-  const ul = document.getElementById('staffList');
-  if (!ul) return;
-  ul.innerHTML = '';
+  const tbody = document.querySelector('#staffList tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
   staff.forEach(s => {
-    const li = document.createElement('li');
+    const tr = document.createElement('tr');
     const dept = departments.find(d => d.id === s.departmentId);
-    li.textContent = `${s.name} (${dept ? dept.name : ''})`;
+    tr.innerHTML = `<td>${s.name}</td><td>${dept ? dept.name : ''}</td>`;
+    const td = document.createElement('td');
     const del = document.createElement('button');
     del.textContent = 'x';
     del.onclick = async () => {
       await fetch(`/api/staff/${s.id}`, {method:'DELETE'});
       loadTickets();
     };
-    li.appendChild(del);
-    ul.appendChild(li);
+    td.appendChild(del);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
   });
 }
 
@@ -282,21 +298,23 @@ async function loadUsersList() {
 }
 
 function renderUserList() {
-  const ul = document.getElementById('userList');
-  if (!ul) return;
-  ul.innerHTML = '';
+  const tbody = document.querySelector('#userList tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
   users.forEach(u => {
-    const li = document.createElement('li');
+    const tr = document.createElement('tr');
     const dept = departments.find(d => d.id === u.departmentId);
-    li.textContent = `${u.username} (${u.role}) - ${u.name}${dept ? ' ('+dept.name+')' : ''}`;
+    tr.innerHTML = `<td>${u.username}</td><td>${u.name}</td><td>${u.role}</td><td>${dept ? dept.name : ''}</td>`;
+    const td = document.createElement('td');
     const del = document.createElement('button');
     del.textContent = 'x';
     del.onclick = async () => {
       await fetch(`/api/users/${u.id}`, {method:'DELETE'});
       loadUsersList();
     };
-    li.appendChild(del);
-    ul.appendChild(li);
+    td.appendChild(del);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
   });
 }
 
