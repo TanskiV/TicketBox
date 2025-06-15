@@ -40,6 +40,11 @@ const translations = {
 
 let currentLang = 'en';
 
+const loginForm = document.getElementById('loginForm');
+const username = document.getElementById('username');
+const password = document.getElementById('password');
+const error = document.getElementById('error');
+
 function t(key) {
   return translations[currentLang][key] || key;
 }
@@ -72,19 +77,15 @@ document.getElementById('langToggle').addEventListener('click', () => {
   setLang(currentLang === 'en' ? 'he' : 'en');
 });
 setLang(getLang());
-async function check(){
-  const stored = localStorage.getItem('user');
-  if(stored){
-    const u = JSON.parse(stored);
-    window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
-    return;
-  }
+async function check() {
   const res = await fetch('/api/me');
-  if(res.ok){
+  if (res.ok) {
     const u = await res.json();
     localStorage.setItem('user', JSON.stringify(u));
     window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
+    return;
   }
+  localStorage.removeItem('user');
 }
 check();
 loginForm.addEventListener('submit', async e => {
