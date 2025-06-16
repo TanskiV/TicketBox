@@ -200,7 +200,8 @@ app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
     description,
     room,
     departmentId: null,
-    createdBy: 'Guest'
+    openedBy: 'guest',
+    openedAt: new Date()
   });
   if (req.file) {
     await Photo.create({
@@ -225,7 +226,8 @@ app.post('/api/tickets', async (req, res) => {
     description,
     room,
     departmentId: body.departmentId || null,
-    createdBy: req.user ? req.user.username : body.createdBy || ''
+    openedBy: req.user ? req.user.username : 'guest',
+    openedAt: new Date()
   });
   console.log('Saved to DB');
   res.json(ticket);
@@ -238,7 +240,9 @@ app.post('/api/tickets/:id/close', async (req, res) => {
   if (!ticket.isClosed) {
     ticket.isClosed = true;
     ticket.closedAt = new Date();
+    ticket.closedBy = req.user ? req.user.username : '';
     await ticket.save();
+    await Photo.deleteMany({ ticketId: ticket._id });
     console.log('Saved to DB');
   }
   res.json(ticket);
