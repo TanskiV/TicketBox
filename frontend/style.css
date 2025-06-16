@@ -247,11 +247,41 @@ tbody tr:hover {
   background-color: #e6f2ff;
 }
 @media (max-width: 600px) {
-  th:nth-child(6),
-  td:nth-child(6),
-  th:nth-child(8),
-  td:nth-child(8) {
+  #tickets thead {
     display: none;
+  }
+  #tickets,
+  #tickets tbody,
+  #tickets tr,
+  #tickets td {
+    display: block;
+    width: 100%;
+  }
+  #tickets tr {
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+  }
+  #tickets td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 50%;
+    white-space: pre-wrap;
+  }
+  #tickets td:last-child {
+    border-bottom: 0;
+  }
+  #tickets td::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    padding-right: 0.5rem;
+    font-weight: bold;
+    white-space: nowrap;
+    content: attr(data-label);
   }
 }
 
