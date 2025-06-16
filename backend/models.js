@@ -1,21 +1,4 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
-
-const MONGO_URI = process.env.MONGODB_URI;
-if(!MONGO_URI) {
-  throw new Error('MONGODB_URI is not defined');
-}
-
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  dbName: 'ticketbox',
-});
-
-mongoose.connection.once('open', () => {
-  console.log('✅ Connected to MongoDB');
-});
-mongoose.connection.on('error', console.error);
 
 const DepartmentSchema = new mongoose.Schema({
   name: { type: String, required: true }
