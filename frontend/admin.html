@@ -79,12 +79,21 @@ function authHeaders(){
 }
 async function requireLogin(){
   const stored = localStorage.getItem('user');
-  if(!stored){
+  let u = null;
+  if(stored){
+    u = JSON.parse(stored);
+  } else {
+    const res = await fetch('/api/me');
+    if(res.ok){
+      u = await res.json();
+      localStorage.setItem('user', JSON.stringify(u));
+    }
+  }
+  if(!u){
     window.location.href = '/login.html';
     return;
   }
-  const u = JSON.parse(stored);
-  if(u.role !== 'admin') { window.location.href = '/index.html'; return; }
+  if(u.role !== 'admin'){ window.location.href = '/index.html'; return; }
   currentUser = u;
 }
 requireLogin();

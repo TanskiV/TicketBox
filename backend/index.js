@@ -41,9 +41,16 @@ const sessions = {}; // token -> userId
 
 app.use(express.json());
 
+function getTokenFromCookie(req) {
+  const cookie = req.headers.cookie || '';
+  const m = cookie.match(/(?:^|; )token=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
 async function authMiddleware(req, res, next) {
   const auth = req.headers.authorization;
-  const token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  let token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) token = getTokenFromCookie(req);
   if (token && sessions[token]) {
     const user = await User.findById(sessions[token]);
     if (user) req.user = user;
@@ -63,6 +70,7 @@ app.post('/api/login', async (req, res) => {
   }
   const token = crypto.randomBytes(16).toString('hex');
   sessions[token] = user._id;
+  res.cookie('token', token, { path: '/' });
   res.json({
     token,
     user: { id: user._id, username: user.username, role: user.role, departmentId: user.departmentId }
@@ -71,8 +79,10 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/logout', (req, res) => {
   const auth = req.headers.authorization;
-  const token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  let token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) token = getTokenFromCookie(req);
   if (token) delete sessions[token];
+  res.clearCookie('token', { path: '/' });
   res.json({ ok: true });
 });
 
