@@ -17,9 +17,10 @@ function connectEventStream() {
 }
 
 window.addEventListener('load', () => {
-  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+  if (!('Notification' in window)) return;
+  const hasSW = 'serviceWorker' in navigator;
   if (Notification.permission === 'granted') {
-    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    if (hasSW) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
     connectEventStream();
     return;
   }
@@ -105,7 +106,7 @@ window.addEventListener('load', () => {
     try {
       const result = await Notification.requestPermission();
       if (result === 'granted') {
-        navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+        if (hasSW) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
         connectEventStream();
       }
     } catch (e) {}
