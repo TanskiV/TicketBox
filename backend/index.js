@@ -255,6 +255,11 @@ app.get('/api/rooms/:room', (req, res) => {
   res.json(tickets);
 });
 
+// fallback to index.html for any other route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(FRONTEND, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Сервер запущен на http://localhost:${PORT}`);
 });
