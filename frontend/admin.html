@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title data-i18n="title">TicketBox - Fault Management</title>
+  <title data-i18n="title">Hotel Sharon - TicketBox</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <a href="https://sharon.co.il/" target="_blank">
-        <img src="logo.png" alt="Sharon Hotel" class="logo" />
-      </a>
-      <h1 data-i18n="title">TicketBox - Fault Management</h1>
+      <img src="logo.png" alt="Hotel Sharon" class="logo" />
+      <div class="header-title">
+        <h1>TicketBox – Fault Management</h1>
+        <h3>Hotel Sharon</h3>
+      </div>
     </header>
     <button id="langToggle"></button>
     <button id="logout" data-i18n="logout"></button>
@@ -53,6 +54,7 @@
   <div class="panel">
     <h3>Change Password</h3>
     <form id="passwordForm">
+      <select id="passwordUser"></select>
       <input type="password" id="adminPassword" placeholder="New Password" required />
       <button type="submit" data-i18n="change">Change</button>
     </form>
@@ -86,7 +88,7 @@ async function requireLogin(){
 requireLogin();
 const translations = {
   en: {
-    title: 'TicketBox - Fault Management',
+    title: 'Hotel Sharon - TicketBox',
     newTicket: 'New Ticket',
     description: 'Description',
     department: 'Department',
@@ -121,7 +123,7 @@ const translations = {
       closedAt: 'Closed at'
     },
     he: {
-    title: 'TicketBox - \u05DE\u05E2\u05E8\u05DB\u05EA \u05DC\u05E0\u05D9\u05D4\u05D5\u05DC \u05EA\u05E7\u05DC\u05D5\u05EA',
+    title: 'Hotel Sharon - TicketBox',
     newTicket: '\u05EA\u05E7\u05DC\u05D4 \u05D7\u05D3\u05E9\u05D4',
     description: '\u05EA\u05D9\u05D0\u05D5\u05E8',
     department: '\u05DE\u05D7\u05DC\u05E7\u05D4',
@@ -253,6 +255,16 @@ async function loadUsersList() {
       deptSel.appendChild(opt);
     });
   }
+  const userSel = document.getElementById('passwordUser');
+  if (userSel) {
+    userSel.innerHTML = '';
+    users.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = u.username;
+      userSel.appendChild(opt);
+    });
+  }
   renderUserList();
 }
 
@@ -307,11 +319,16 @@ const passwordForm = document.getElementById('passwordForm');
 if (passwordForm) {
   passwordForm.addEventListener('submit', async e => {
     e.preventDefault();
-    await fetch(`/api/users/${currentUser.id}/password`, {
+    const userId = document.getElementById('passwordUser').value;
+    const pwd = document.getElementById('adminPassword').value;
+    if (!userId) return;
+    await fetch(`/api/users/${userId}/password`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ password: document.getElementById('adminPassword').value })
+      body: JSON.stringify({ password: pwd })
     });
+    const u = users.find(u => u.id === userId);
+    alert(`Password for user ${u ? u.username : userId} updated successfully`);
     e.target.reset();
   });
 }
