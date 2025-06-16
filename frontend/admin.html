@@ -19,25 +19,39 @@
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
   <div class="panel form-section">
     <h3>Add New Department</h3>
-    <form id="deptForm">
-      <input type="text" id="newDept" required />
-      <button type="submit" data-i18n="add">Add</button>
+    <form id="deptForm" class="row g-2">
+      <div class="col">
+        <input type="text" id="newDept" class="form-control" required />
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary" data-i18n="add">Add</button>
+      </div>
     </form>
-    <ul id="deptList"></ul>
+    <ul id="deptList" class="list-group mt-2"></ul>
   </div>
 
   <h2 data-i18n="manageUsers">Manage Users</h2>
   <div class="panel form-section">
     <h3>Add User (Login Access)</h3>
-    <form id="userForm">
-      <input type="text" id="newUsername" data-i18n-placeholder="login" required />
-      <input type="password" id="newPassword" data-i18n-placeholder="password" required />
-      <select id="userDept"></select>
-      <select id="userRole">
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </select>
-      <button type="submit" data-i18n="add">Add</button>
+    <form id="userForm" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <input type="text" id="newUsername" data-i18n-placeholder="login" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <input type="password" id="newPassword" data-i18n-placeholder="password" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <select id="userDept" class="form-select"></select>
+      </div>
+      <div class="col-md-2">
+        <select id="userRole" class="form-select">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100" data-i18n="add">Add</button>
+      </div>
     </form>
     <div class="table-responsive">
       <table id="userList" class="table table-bordered table-sm">
@@ -52,18 +66,26 @@
   <h2 data-i18n="changePassword">Change Password</h2>
   <div class="panel form-section">
     <h3>Change Password</h3>
-    <form id="passwordForm">
-      <select id="passwordUser"></select>
-      <input type="password" id="adminPassword" placeholder="New Password" required />
-      <button type="submit" data-i18n="change">Change</button>
+    <form id="passwordForm" class="row g-2">
+      <div class="col-md-4">
+        <select id="passwordUser" class="form-select"></select>
+      </div>
+      <div class="col-md-4">
+        <input type="password" id="adminPassword" class="form-control" placeholder="New Password" required />
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-primary w-100" data-i18n="change">Change</button>
+      </div>
     </form>
   </div>
 
   <h2 data-i18n="tickets">Tickets</h2>
   <div class="panel form-section">
-    <button id="downloadBackup" data-i18n="downloadBackup">Download Backup</button>
-    <input type="file" id="backupFile" accept=".json" />
-    <button id="uploadBackup" data-i18n="uploadBackup">Upload Backup</button>
+    <div class="mb-3 d-flex flex-wrap gap-2">
+      <button id="downloadBackup" class="btn btn-secondary" data-i18n="downloadBackup">Download Backup</button>
+      <input type="file" id="backupFile" class="form-control" accept=".json" />
+      <button id="uploadBackup" class="btn btn-primary" data-i18n="uploadBackup">Upload Backup</button>
+    </div>
     <div class="table-responsive">
       <table id="ticketList" class="table table-bordered table-sm">
         <thead>
@@ -268,8 +290,10 @@ function renderDeptList() {
   ul.innerHTML = '';
   departments.forEach(d => {
     const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
     li.textContent = d.name;
     const del = document.createElement('button');
+    del.className = 'btn btn-sm btn-danger';
     del.textContent = 'x';
     del.onclick = async () => {
       await fetch(`/api/departments/${d.id}`, {method:'DELETE', headers: authHeaders()});
@@ -318,6 +342,7 @@ function renderUserList() {
     tr.innerHTML = `<td>${u.username}</td><td>${u.role}</td><td>${dept ? dept.name : ''}</td>`;
     const td = document.createElement('td');
     const del = document.createElement('button');
+    del.className = 'btn btn-sm btn-danger';
     del.textContent = 'x';
     del.onclick = async () => {
       await fetch(`/api/users/${u.id}`, {method:'DELETE', headers: authHeaders()});
@@ -390,6 +415,7 @@ function renderTicketList() {
     tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td>`;
     const td = document.createElement('td');
     const del = document.createElement('button');
+    del.className = 'btn btn-sm btn-danger';
     del.textContent = tTranslate('delete');
     del.onclick = async () => {
       if (!confirm(tTranslate('deleteConfirm'))) return;
