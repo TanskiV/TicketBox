@@ -224,6 +224,31 @@ app.post('/api/tickets/:id/close', (req, res) => {
   res.json(ticket);
 });
 
+// Delete ticket (admin only)
+app.delete('/api/tickets/:id', requireAdmin, (req, res) => {
+  let tickets = loadTickets();
+  const index = tickets.findIndex(t => t.id == req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'not found' });
+  tickets.splice(index, 1);
+  saveTickets(tickets);
+  res.json({ ok: true });
+});
+
+// Download backup of tickets
+app.get('/api/tickets/backup', requireAdmin, (req, res) => {
+  const tickets = loadTickets();
+  const date = new Date().toISOString().slice(0, 10);
+  res.setHeader('Content-Disposition', `attachment; filename="tickets-backup-${date}.json"`);
+  res.json(tickets);
+});
+
+// Restore tickets from uploaded backup
+app.post('/api/tickets/restore', requireAdmin, (req, res) => {
+  if (!Array.isArray(req.body)) return res.status(400).json({ error: 'invalid data' });
+  saveTickets(req.body);
+  res.json({ ok: true });
+});
+
 // История по комнате
 app.get('/api/rooms/:room', (req, res) => {
   const tickets = loadTickets().filter(t => t.room === req.params.room);

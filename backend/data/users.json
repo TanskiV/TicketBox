@@ -5,5 +5,12 @@
     "password": "$2b$10$sZP2uKzUbn6j8nIgsxtCnubwijXqfuyZ6ZpreLr9SYcPARGh4YOsG",
     "role": "admin",
     "departmentId": ""
+  },
+  {
+    "id": "u1749969010991",
+    "username": "Erez",
+    "password": "$2b$10$x1K448vRUO7Q0ayIi7JDxewyM8p/K2qZeK9lSE22q8gCbK6K0iUGK",
+    "role": "user",
+    "departmentId": "d1749735173417"
   }
 ]
