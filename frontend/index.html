@@ -4,36 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="title">Hotel Sharon - TicketBox</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <div class="header-logo">
-        <a href="https://sharon.co.il" target="_blank"><img src="logo.png" alt="Hotel Sharon" class="logo" /></a>
-        <h1 data-i18n="title">Hotel Sharon - TicketBox</h1>
-      </div>
-      <div class="header-buttons">
-        <button id="langToggle"></button>
-        <button id="logout" data-i18n="logout"></button>
-        <a href="index.html">🏠 Home</a>
-      </div>
-    </header>
+    <div class="text-center my-3">
+      <a href="https://sharon.co.il" target="_blank">
+        <img src="logo.png" class="img-fluid" style="max-height:80px;" />
+      </a>
+      <h2 class="mt-2" data-i18n="title">Hotel Sharon - TicketBox</h2>
+    </div>
+    <div class="d-flex justify-content-center gap-2 mb-3">
+      <button id="langToggle" class="btn btn-sm btn-outline-secondary"></button>
+      <button id="logout" class="btn btn-sm btn-primary" data-i18n="logout"></button>
+      <a href="index.html" class="btn btn-sm btn-link">🏠 Home</a>
+    </div>
 
   <div class="ticket-form">
     <h2 data-i18n="newTicket">New Ticket</h2>
-    <form id="addForm">
-      <textarea id="desc" data-i18n-placeholder="description" required></textarea>
-      <input type="text" id="room" data-i18n-placeholder="room" required />
-      <button type="submit" data-i18n="submit">Add Ticket</button>
+    <form id="addForm" class="container mt-3">
+      <div class="row g-2">
+        <div class="col-12 col-sm-6">
+          <textarea id="desc" data-i18n-placeholder="description" class="form-control" required></textarea>
+        </div>
+        <div class="col-12 col-sm-4">
+          <input type="text" id="room" data-i18n-placeholder="room" class="form-control" required />
+        </div>
+        <div class="col-12 col-sm-2">
+          <button type="submit" class="btn btn-primary w-100" data-i18n="submit">Add Ticket</button>
+        </div>
+      </div>
     </form>
   </div>
 
   <h2 data-i18n="tickets">Tickets</h2>
   <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" /></label>
-  <button onclick="loadTickets()" data-i18n="refresh">Refresh</button>
-    <div class="table-wrapper">
-  <table id="tickets">
+  <button onclick="loadTickets()" data-i18n="refresh" class="btn btn-secondary mb-2">Refresh</button>
+  <div class="table-responsive">
+  <table id="tickets" class="table table-bordered table-sm">
     <thead>
       <tr>
         <th data-i18n="id" data-key="id" class="sortable">ID</th>
@@ -50,7 +59,7 @@
     </thead>
     <tbody></tbody>
   </table>
-    </div>
+  </div>
 
 
 
