@@ -196,3 +196,19 @@ ul li button {
     border-color: #444;
   }
 }
+
+/* Sorting */
+th.sortable {
+  cursor: pointer;
+}
+th.sorted-asc::after {
+  content: ' \25B2';
+}
+th.sorted-desc::after {
+  content: ' \25BC';
+}
+
+/* Divider between open and closed tickets */
+tbody tr.divider td {
+  border-top: 2px solid #ccc;
+}
