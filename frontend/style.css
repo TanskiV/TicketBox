@@ -1,9 +1,14 @@
 /* General styles */
 :root {
-  --font-stack: 'Segoe UI', 'Heebo', Arial, sans-serif;
-  --primary-color: #0066cc;
+  --font-stack: 'Heebo', Arial, sans-serif;
+  --primary-color: #005baa;
   --danger-color: #d9534f;
   --success-color: #28a745;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 * {
@@ -14,7 +19,7 @@ body {
   font-family: var(--font-stack);
   margin: 0;
   padding: 1em;
-  background-color: #fff;
+  background-color: #f5f5f5;
   color: #222;
 }
 
@@ -151,7 +156,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: #e6f2ff;
 }
 
 .table-users, .table-staff {
