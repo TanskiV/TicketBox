@@ -188,8 +188,12 @@ app.post('/api/tickets', (req, res) => {
   if (!description || !room || !openedBy) {
     return res.status(400).json({ error: 'missing fields' });
   }
+  const maxId = tickets.reduce((m, t) => {
+    const n = parseInt(t.id, 10);
+    return Number.isFinite(n) ? Math.max(m, n) : m;
+  }, 100000);
   const ticket = {
-    id: crypto.randomUUID(),
+    id: maxId + 1,
     description,
     departmentId: body.departmentId || '',
     room,
@@ -207,7 +211,7 @@ app.post('/api/tickets', (req, res) => {
 // Закрыть заявку
 app.post('/api/tickets/:id/close', (req, res) => {
   const tickets = loadTickets();
-  const ticket = tickets.find(t => t.id === req.params.id);
+  const ticket = tickets.find(t => t.id == req.params.id);
   if (!ticket) {
     return res.status(404).json({ error: 'not found' });
   }
