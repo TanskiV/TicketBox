@@ -295,8 +295,17 @@ async function loadTickets() {
     const closedBy = ticket.closedBy || '';
     const statusClass = ticket.closedAt ? 'status-closed' : 'status-open';
     const statusText = ticket.closedAt ? t('closedStatus') : t('openStatus');
-    tr.innerHTML = `<td>${ticket.id}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${dept ? dept.name : ''}</td><td>${openedBy}</td><td>${closedBy}</td><td>${opened}</td><td>${closed}</td><td class="${statusClass}">${statusText}</td>`;
+    tr.innerHTML = `<td data-label="${t('id')}">${ticket.id}</td>` +
+                  `<td data-label="${t('description')}">${ticket.description}</td>` +
+                  `<td data-label="${t('room')}">${ticket.room}</td>` +
+                  `<td data-label="${t('department')}">${dept ? dept.name : ''}</td>` +
+                  `<td data-label="${t('openedBy')}">${openedBy}</td>` +
+                  `<td data-label="${t('closedBy')}">${closedBy}</td>` +
+                  `<td data-label="${t('openedAt')}">${opened}</td>` +
+                  `<td data-label="${t('closedAt')}">${closed}</td>` +
+                  `<td data-label="${t('status')}" class="${statusClass}">${statusText}</td>`;
     const actionTd = document.createElement('td');
+    actionTd.setAttribute('data-label', t('actions'));
     if (!ticket.closedAt) {
       const btn = document.createElement('button');
       btn.textContent = t('close');
