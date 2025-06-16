@@ -7,13 +7,15 @@
 </head>
 <body>
   <div class="container">
-    <a href="https://sharon.co.il/" target="_blank">
-      <img src="logo.png" alt="Sharon Hotel" style="height:40px;" />
-    </a>
+    <header class="header">
+      <a href="https://sharon.co.il/" target="_blank">
+        <img src="logo.png" alt="Sharon Hotel" class="logo" />
+      </a>
+      <h1 data-i18n="title">TicketBox - Fault Management</h1>
+    </header>
     <button id="langToggle"></button>
     <button id="logout" data-i18n="logout"></button>
     <a href="index.html">🏠 Home</a>
-    <h1 data-i18n="title">TicketBox - Fault Management</h1>
 
 
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
@@ -56,6 +58,19 @@
     </form>
   </div>
 
+  <h2 data-i18n="tickets">Tickets</h2>
+  <div class="panel">
+    <button id="downloadBackup" data-i18n="downloadBackup">Download Backup</button>
+    <input type="file" id="backupFile" accept=".json" />
+    <button id="uploadBackup" data-i18n="uploadBackup">Upload Backup</button>
+    <table id="ticketList" class="table-users">
+      <thead>
+        <tr><th>ID</th><th data-i18n="description">Description</th><th data-i18n="room">Room</th><th data-i18n="actions">Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
 <script>
 let currentUser = null;
 async function requireLogin(){
@@ -95,6 +110,10 @@ const translations = {
     changePassword: 'Change Password',
     logout: 'Logout',
     change: 'Change',
+    downloadBackup: 'Download Backup',
+    uploadBackup: 'Upload Backup',
+    deleteConfirm: 'Delete this ticket?',
+    delete: 'Delete',
     openStatus: 'Open',
       closedStatus: 'Closed',
       close: 'Close',
@@ -130,7 +149,11 @@ const translations = {
       password: '\u05E1\u05D9\u05E1\u05DE\u05D4',
       changePassword: '\u05E9\u05D9\u05E0\u05D5\u05D9 \u05E1\u05D9\u05E1\u05DE\u05D4',
       logout: '\u05D9\u05E6\u05D9\u05D0\u05D4',
-      change: '\u05E9\u05E0\u05D4'
+      change: '\u05E9\u05E0\u05D4',
+      downloadBackup: '\u05D4\u05D5\u05E8\u05D3 \u05D2\u05D9\u05D1\u05D5\u05D9',
+      uploadBackup: '\u05D4\u05E2\u05DC\u05D4 \u05D2\u05D9\u05D1\u05D5\u05D9',
+      deleteConfirm: '\u05DC\u05DE\u05D7\u05D5\u05E7 \u05D0\u05EA \u05D4\u05EA\u05E7\u05DC\u05D4?',
+      delete: '\u05DE\u05D7\u05D9\u05E7\u05D4'
     }
   };
 
@@ -292,6 +315,53 @@ if (passwordForm) {
     e.target.reset();
   });
 }
+
+let ticketsData = [];
+
+async function loadTicketList() {
+  const res = await fetch('/api/tickets');
+  ticketsData = await res.json();
+  renderTicketList();
+}
+
+function renderTicketList() {
+  const tbody = document.querySelector('#ticketList tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  ticketsData.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td>`;
+    const td = document.createElement('td');
+    const del = document.createElement('button');
+    del.textContent = tTranslate('delete');
+    del.onclick = async () => {
+      if (!confirm(tTranslate('deleteConfirm'))) return;
+      await fetch('/api/tickets/' + t.id, { method: 'DELETE' });
+      loadTicketList();
+    };
+    td.appendChild(del);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('downloadBackup').addEventListener('click', () => {
+  window.location = '/api/tickets/backup';
+});
+
+document.getElementById('uploadBackup').addEventListener('click', async () => {
+  const input = document.getElementById('backupFile');
+  if (!input.files.length) return;
+  if (!confirm('Are you sure? This will overwrite all current data.')) return;
+  const text = await input.files[0].text();
+  await fetch('/api/tickets/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: text });
+  input.value = '';
+  loadTicketList();
+});
+
+function tTranslate(key) { return t(key); }
+
+loadTicketList();
 
 </script>
 </div>

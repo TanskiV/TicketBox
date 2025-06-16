@@ -11,6 +11,27 @@
   margin: 0 auto;
 }
 
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+
+.header .logo {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
