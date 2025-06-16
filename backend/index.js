@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -19,7 +20,6 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 const upload = multer({ dest: UPLOAD_DIR });
 
 const sessions = {}; // token -> userId
@@ -108,6 +108,7 @@ app.get('/api/departments', async (req, res) => {
 
 app.post('/api/departments', async (req, res) => {
   const dept = await Department.create({ name: req.body.name || '' });
+  console.log('Saved to DB');
   res.json(dept);
 });
 
@@ -131,6 +132,7 @@ app.post('/api/users', requireAdmin, async (req, res) => {
     role: body.role || 'user',
     departmentId: body.departmentId || null
   });
+  console.log('Saved to DB');
   res.json(user);
 });
 
@@ -144,6 +146,7 @@ app.post('/api/users/:id/password', requireAdmin, async (req, res) => {
   if (!user) return res.status(404).json({ error: 'not found' });
   user.passwordHash = bcrypt.hashSync(req.body.password || '1234', 10);
   await user.save();
+  console.log('Saved to DB');
   res.json({ ok: true });
 });
 
@@ -171,6 +174,7 @@ app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
     createdBy: 'Guest',
     imageUrl: req.file ? '/uploads/' + req.file.filename : ''
   });
+  console.log('Saved to DB');
   res.json(ticket);
 });
 
@@ -188,6 +192,7 @@ app.post('/api/tickets', async (req, res) => {
     createdBy: req.user ? req.user.username : body.createdBy || '',
     imageUrl: body.imageUrl || ''
   });
+  console.log('Saved to DB');
   res.json(ticket);
 });
 
@@ -199,6 +204,7 @@ app.post('/api/tickets/:id/close', async (req, res) => {
     ticket.isClosed = true;
     ticket.closedAt = new Date();
     await ticket.save();
+    console.log('Saved to DB');
   }
   res.json(ticket);
 });
@@ -222,6 +228,7 @@ app.post('/api/tickets/restore', requireAdmin, async (req, res) => {
   if (!Array.isArray(req.body)) return res.status(400).json({ error: 'invalid data' });
   await Ticket.deleteMany({});
   await Ticket.insertMany(req.body);
+  console.log('Saved to DB');
   res.json({ ok: true });
 });
 
