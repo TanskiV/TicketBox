@@ -4,13 +4,25 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 
-const TICKETS_FILE = path.join(__dirname, 'data', 'tickets.json');
-const DEPTS_FILE = path.join(__dirname, 'data', 'departments.json');
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const TICKETS_FILE = path.join(DATA_DIR, 'tickets.json');
+const DEPTS_FILE = path.join(DATA_DIR, 'departments.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const upload = multer({ dest: UPLOAD_DIR });
 
 const sessions = {}; // token -> userId
 
@@ -102,6 +114,7 @@ app.get('/admin.html', (req, res) => {
 });
 
 app.use(express.static(FRONTEND));
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Сервер работает' });
@@ -178,6 +191,34 @@ app.get('/api/tickets', (req, res) => {
     tickets = tickets.filter(t => t.departmentId === req.query.departmentId);
   }
   res.json(tickets);
+});
+
+// Public ticket submission with optional photo
+app.post('/api/public-ticket', upload.single('photo'), (req, res) => {
+  const tickets = loadTickets();
+  const { room = '', description = '' } = req.body || {};
+  if (!room) return res.status(400).json({ error: 'missing room' });
+  const maxId = tickets.reduce((m, t) => {
+    const n = parseInt(t.id, 10);
+    return Number.isFinite(n) ? Math.max(m, n) : m;
+  }, 100000);
+  const ticket = {
+    id: maxId + 1,
+    description,
+    departmentId: '',
+    room,
+    openedBy: 'Guest',
+    openedAt: new Date().toISOString(),
+    closedAt: null,
+    closedBy: null,
+    comment: ''
+  };
+  if (req.file) {
+    ticket.photo = '/uploads/' + req.file.filename;
+  }
+  tickets.push(ticket);
+  saveTickets(tickets);
+  res.json(ticket);
 });
 
 // Создать заявку
