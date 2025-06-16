@@ -5,7 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const { Ticket, User, Department } = require('./models');
+const { Ticket, User, Department, Photo } = require('./models');
 
 const PORT = process.env.PORT || 3000;
 
@@ -94,7 +94,6 @@ app.get('/admin.html', (req, res) => {
 });
 
 app.use(express.static(FRONTEND));
-app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Сервер работает' });
@@ -160,7 +159,12 @@ app.get('/api/tickets', async (req, res) => {
   if (req.query.room) query.room = req.query.room;
   if (req.query.departmentId) query.departmentId = req.query.departmentId;
   const tickets = await Ticket.find(query);
-  res.json(tickets);
+  const list = [];
+  for (const t of tickets) {
+    const hasPhoto = await Photo.exists({ ticketId: t._id });
+    list.push({ ...t.toObject(), photoUrl: hasPhoto ? `/api/photos/${t._id}` : '' });
+  }
+  res.json(list);
 });
 
 // Public ticket submission with optional photo
@@ -171,9 +175,16 @@ app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
     description,
     room,
     departmentId: null,
-    createdBy: 'Guest',
-    imageUrl: req.file ? '/uploads/' + req.file.filename : ''
+    createdBy: 'Guest'
   });
+  if (req.file) {
+    await Photo.create({
+      ticketId: ticket._id,
+      data: fs.readFileSync(req.file.path),
+      contentType: req.file.mimetype
+    });
+    fs.unlink(req.file.path, () => {});
+  }
   console.log('Saved to DB');
   res.json(ticket);
 });
@@ -189,8 +200,7 @@ app.post('/api/tickets', async (req, res) => {
     description,
     room,
     departmentId: body.departmentId || null,
-    createdBy: req.user ? req.user.username : body.createdBy || '',
-    imageUrl: body.imageUrl || ''
+    createdBy: req.user ? req.user.username : body.createdBy || ''
   });
   console.log('Saved to DB');
   res.json(ticket);
@@ -238,11 +248,18 @@ app.get('/api/rooms/:room', async (req, res) => {
   res.json(tickets);
 });
 
+app.get('/api/photos/:ticketId', async (req, res) => {
+  const photo = await Photo.findOne({ ticketId: req.params.ticketId });
+  if (!photo) return res.status(404).end();
+  res.contentType(photo.contentType);
+  res.send(photo.data);
+});
+
 // fallback to index.html for any other route
 app.get('*', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`Сервер запущен на http://localhost:${PORT}`);
+  console.log(`Сервер запущен на порту ${PORT}`);
 });

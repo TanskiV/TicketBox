@@ -1,7 +1,10 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/ticketbox';
+const MONGO_URI = process.env.MONGODB_URI;
+if(!MONGO_URI) {
+  throw new Error('MONGODB_URI is not defined');
+}
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
@@ -35,9 +38,15 @@ const TicketSchema = new mongoose.Schema({
   createdBy: String,
   createdAt: { type: Date, default: Date.now },
   closedAt: Date,
-  isClosed: { type: Boolean, default: false },
-  imageUrl: String
+  isClosed: { type: Boolean, default: false }
 });
 const Ticket = mongoose.model('Ticket', TicketSchema);
 
-module.exports = { mongoose, Ticket, User, Department };
+const PhotoSchema = new mongoose.Schema({
+  ticketId: { type: mongoose.Schema.Types.ObjectId, ref: 'Ticket', required: true },
+  data: Buffer,
+  contentType: String
+});
+const Photo = mongoose.model('Photo', PhotoSchema);
+
+module.exports = { mongoose, Ticket, User, Department, Photo };

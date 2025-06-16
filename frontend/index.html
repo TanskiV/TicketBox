@@ -42,6 +42,7 @@
         <th data-i18n="description" data-key="description" class="sortable">Description</th>
         <th data-i18n="room" data-key="room" class="sortable">Room</th>
         <th data-i18n="department" data-key="department" class="sortable">Department</th>
+        <th data-i18n="photo">Photo</th>
         <th data-i18n="openedBy" data-key="openedBy" class="sortable">Opened by</th>
         <th data-i18n="closedBy" data-key="closedBy" class="sortable">Closed by</th>
         <th data-i18n="openedAt" data-key="openedAt" class="sortable">Opened at</th>
@@ -90,6 +91,7 @@ const translations = {
     id: 'ID',
     status: 'Status',
     actions: 'Actions',
+    photo: 'Photo',
     openedBy: 'Opened by',
     closedBy: 'Closed by',
     selectDepartment: 'Select Department',
@@ -117,6 +119,7 @@ const translations = {
     id: '\u05DE\u05D6\u05D4\u05D4',
     status: '\u05E1\u05D8\u05D8\u05D5\u05E1',
     actions: '\u05E4\u05E2\u05D5\u05DC\u05D5\u05EA',
+    photo: '\u05EA\u05DE\u05D5\u05E0\u05D4',
     openStatus: '\u05E4\u05EA\u05D5\u05D7\u05D4',
       closedStatus: '\u05E1\u05D2\u05D5\u05E8\u05D4',
       close: '\u05E1\u05D2\u05D5\u05E8',
@@ -295,6 +298,7 @@ async function loadTickets() {
                   `<td data-label="${t('description')}">${ticket.description}</td>` +
                   `<td data-label="${t('room')}">${ticket.room}</td>` +
                   `<td data-label="${t('department')}">${dept ? dept.name : ''}</td>` +
+                  `<td data-label="${t('photo')}">${ticket.photoUrl ? '<img src="' + ticket.photoUrl + '" style="max-width:60px">' : ''}</td>` +
                   `<td data-label="${t('openedBy')}">${openedBy}</td>` +
                   `<td data-label="${t('closedBy')}">${closedBy}</td>` +
                   `<td data-label="${t('openedAt')}">${opened}</td>` +
@@ -323,6 +327,7 @@ async function loadTickets() {
         `<p><strong>${t('id')}:</strong> ${ticket.id}</p>` +
         `<p><strong>${t('description')}:</strong> ${ticket.description}</p>` +
         `<p><strong>${t('room')}:</strong> ${ticket.room}</p>` +
+        (ticket.photoUrl ? `<p><img src="${ticket.photoUrl}" style="max-width:100%"></p>` : '') +
         `<p><strong>${t('openedBy')}:</strong> ${openedBy}</p>` +
         `<p><strong>${t('closedBy')}:</strong> ${closedBy || '-'}</p>` +
         `<p><strong>${t('status')}:</strong> <span class="badge ${ticket.closedAt ? 'bg-secondary' : 'bg-success'}">${statusText}</span></p>`;
