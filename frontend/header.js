@@ -60,6 +60,8 @@
     fetch('header.html').then(r=>r.text()).then(html=>{
       container.innerHTML = html;
       document.getElementById('langSwitcher').addEventListener('change', e=>updateLang(e.target.value));
+      const toggler = container.querySelector('.navbar-toggler');
+      if (toggler) toggler.addEventListener('click', () => toggler.classList.toggle('open'));
       apply();
       setupLogin();
     });
