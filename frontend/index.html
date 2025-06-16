@@ -2,19 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="title">Hotel Sharon - TicketBox</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <div class="header-logo">
-      <a href="https://sharon.co.il" target="_blank">
-        <img src="logo.png" alt="Hotel Sharon" />
-      </a>
-    </div>
-    <button id="langToggle"></button>
-    <button id="logout" data-i18n="logout"></button>
-    <a href="index.html">🏠 Home</a>
+    <header class="header">
+      <div class="header-logo">
+        <a href="https://sharon.co.il" target="_blank"><img src="logo.png" alt="Hotel Sharon" class="logo" /></a>
+        <h1 data-i18n="title">Hotel Sharon - TicketBox</h1>
+      </div>
+      <div class="header-buttons">
+        <button id="langToggle"></button>
+        <button id="logout" data-i18n="logout"></button>
+        <a href="index.html">🏠 Home</a>
+      </div>
+    </header>
 
   <div class="ticket-form">
     <h2 data-i18n="newTicket">New Ticket</h2>
@@ -28,6 +32,7 @@
   <h2 data-i18n="tickets">Tickets</h2>
   <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" /></label>
   <button onclick="loadTickets()" data-i18n="refresh">Refresh</button>
+    <div class="table-wrapper">
   <table id="tickets">
     <thead>
       <tr>
@@ -45,6 +50,7 @@
     </thead>
     <tbody></tbody>
   </table>
+    </div>
 
 
 
