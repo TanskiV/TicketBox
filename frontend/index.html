@@ -238,8 +238,10 @@ function renderDeptList() {
   ul.innerHTML = '';
   departments.forEach(d => {
     const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
     li.textContent = d.name;
     const del = document.createElement('button');
+    del.className = 'btn btn-sm btn-danger';
     del.textContent = 'x';
     del.onclick = async () => {
       await fetch(`/api/departments/${d.id}`, {method:'DELETE', headers: authHeaders()});
@@ -345,6 +347,7 @@ async function loadTickets() {
     actionTd.setAttribute('data-label', t('actions'));
     if (!ticket.closedAt) {
       const btn = document.createElement('button');
+      btn.className = 'btn btn-sm btn-danger';
       btn.textContent = t('close');
       btn.onclick = () => closeTicket(ticket.id);
       actionTd.appendChild(btn);
