@@ -305,7 +305,7 @@ async function loadTickets() {
                   `<td data-label="${t('description')}">${ticket.description}</td>` +
                   `<td data-label="${t('room')}">${ticket.room}</td>` +
                   `<td data-label="${t('department')}">${dept ? dept.name : ''}</td>` +
-                  `<td data-label="${t('photo')}">${ticket.photoUrl ? '<img src="' + ticket.photoUrl + '" style="max-width:60px">' : ''}</td>` +
+                  `<td data-label="${t('photo')}">${ticket.photoUrl ? '<img src="' + ticket.photoUrl + '" class="photo-thumb" style="max-width:60px">' : ''}</td>` +
                   `<td data-label="${t('openedBy')}">${openedBy}</td>` +
                   `<td data-label="${t('closedBy')}">${closedBy}</td>` +
                   `<td data-label="${t('openedAt')}">${opened}</td>` +
@@ -334,7 +334,7 @@ async function loadTickets() {
         `<p><strong>${t('id')}:</strong> ${ticket.id}</p>` +
         `<p><strong>${t('description')}:</strong> ${ticket.description}</p>` +
         `<p><strong>${t('room')}:</strong> ${ticket.room}</p>` +
-        (ticket.photoUrl ? `<p><img src="${ticket.photoUrl}" style="max-width:100%"></p>` : '') +
+        (ticket.photoUrl ? `<p><img src="${ticket.photoUrl}" class="photo-thumb" style="max-width:100%"></p>` : '') +
         `<p><strong>${t('openedBy')}:</strong> ${openedBy}</p>` +
         `<p><strong>${t('closedBy')}:</strong> ${closedBy || '-'}</p>` +
         `<p><strong>${t('status')}:</strong> <span class="badge ${ticket.closedAt ? 'bg-secondary' : 'bg-success'}">${statusText}</span></p>`;
@@ -411,7 +411,22 @@ if (deptForm) {
 }
 
 // No staff management or close form required
+document.body.addEventListener('click', e => {
+  if (e.target.classList.contains('photo-thumb')) {
+    document.getElementById('modalImage').src = e.target.src;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('photoModal')).show();
+  }
+});
 </script>
+  </div>
+  <div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-body p-0">
+          <img id="modalImage" src="" class="img-fluid w-100" alt="photo">
+        </div>
+      </div>
+    </div>
   </div>
 </body>
 </html>

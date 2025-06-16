@@ -18,8 +18,9 @@ const TicketSchema = new mongoose.Schema({
   description: String,
   room: String,
   departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department' },
-  createdBy: String,
-  createdAt: { type: Date, default: Date.now },
+  openedBy: { type: String, default: 'guest' },
+  openedAt: { type: Date, default: Date.now },
+  closedBy: String,
   closedAt: Date,
   isClosed: { type: Boolean, default: false }
 });

@@ -66,24 +66,8 @@ body {
   font-family: var(--font-stack);
   margin: 0;
   padding: 1em;
-  background-color: #f5f5f5;
+  background-color: #fff;
   color: #222;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #1a1a1a;
-    color: #e4e4e4;
-  }
-  table, th, td {
-    border-color: #555;
-  }
-  thead th {
-    background-color: #333;
-  }
-  tbody tr:nth-child(even) {
-    background-color: #2a2a2a;
-  }
 }
 
 h1, h2 {
@@ -299,6 +283,17 @@ tbody tr:hover {
   font-weight: bold;
 }
 
+.photo-thumb {
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.photo-thumb:hover {
+  transform: scale(2);
+  z-index: 10;
+  position: relative;
+}
+
 /* Lists and admin sections */
 ul {
   list-style: none;
@@ -329,12 +324,6 @@ ul li button {
   background-color: #f9f9f9;
 }
 
-@media (prefers-color-scheme: dark) {
-  .panel {
-    background-color: #2a2a2a;
-    border-color: #444;
-  }
-}
 
 /* Sorting */
 th.sortable {
