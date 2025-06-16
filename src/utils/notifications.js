@@ -1,7 +1,29 @@
 // Push notification permission prompt
+function connectEventStream() {
+  if (!('EventSource' in window)) return;
+  const es = new EventSource('/api/events');
+  es.onmessage = e => {
+    try {
+      const data = JSON.parse(e.data);
+      if (Notification.permission === 'granted') {
+        new Notification('TicketBox', {
+          body: data.type === 'ticket:new'
+            ? `New ticket in room ${data.room}`
+            : 'Ticket closed'
+        });
+      }
+    } catch {}
+  };
+}
+
 window.addEventListener('load', () => {
   if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-  if (Notification.permission === 'granted' || Notification.permission === 'denied') return;
+  if (Notification.permission === 'granted') {
+    navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    connectEventStream();
+    return;
+  }
+  if (Notification.permission === 'denied') return;
 
   const langMap = {
     ru: {
@@ -84,6 +106,7 @@ window.addEventListener('load', () => {
       const result = await Notification.requestPermission();
       if (result === 'granted') {
         navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+        connectEventStream();
       }
     } catch (e) {}
   });

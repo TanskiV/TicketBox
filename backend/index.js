@@ -39,6 +39,13 @@ const upload = multer({ dest: UPLOAD_DIR });
 
 const sessions = {}; // token -> userId
 
+// Connected Server-Sent Events clients
+const eventClients = [];
+function sendEvent(data) {
+  const payload = `data: ${JSON.stringify(data)}\n\n`;
+  eventClients.forEach(res => res.write(payload));
+}
+
 app.use(express.json());
 
 function getTokenFromCookie(req) {
@@ -59,6 +66,19 @@ async function authMiddleware(req, res, next) {
 }
 
 app.use(authMiddleware);
+
+// Events stream for real-time updates
+app.get('/api/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+  eventClients.push(res);
+  req.on('close', () => {
+    const idx = eventClients.indexOf(res);
+    if (idx !== -1) eventClients.splice(idx, 1);
+  });
+});
 
 
 // Authentication
@@ -216,6 +236,7 @@ app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
     fs.unlink(req.file.path, () => {});
   }
   console.log('Saved to DB');
+  sendEvent({ type: 'ticket:new', ticketId: ticket.id, room: ticket.room });
   res.json(ticket);
 });
 
@@ -234,6 +255,7 @@ app.post('/api/tickets', async (req, res) => {
     openedAt: new Date()
   });
   console.log('Saved to DB');
+  sendEvent({ type: 'ticket:new', ticketId: ticket.id, room: ticket.room });
   res.json(ticket);
 });
 
@@ -248,6 +270,7 @@ app.post('/api/tickets/:id/close', async (req, res) => {
     await ticket.save();
     await Photo.deleteMany({ ticketId: ticket._id });
     console.log('Saved to DB');
+    sendEvent({ type: 'ticket:closed', ticketId: ticket.id });
   }
   res.json(ticket);
 });
