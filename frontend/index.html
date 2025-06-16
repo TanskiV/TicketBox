@@ -69,11 +69,17 @@ function authHeaders(){
 }
 async function requireLogin(){
   const stored = localStorage.getItem('user');
-  if(!stored){
-    window.location.href = '/login.html';
+  if(stored){
+    currentUser = JSON.parse(stored);
     return;
   }
-  currentUser = JSON.parse(stored);
+  const res = await fetch('/api/me');
+  if(res.ok){
+    currentUser = await res.json();
+    localStorage.setItem('user', JSON.stringify(currentUser));
+    return;
+  }
+  window.location.href = '/login.html';
 }
 requireLogin();
 const translations = {
