@@ -41,6 +41,8 @@
   <h2 data-i18n="tickets">Tickets</h2>
   <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" /></label>
   <button onclick="loadTickets()" data-i18n="refresh" class="btn btn-secondary mb-2">Refresh</button>
+  <div id="ticketCards" class="d-md-none"></div>
+  <div class="d-none d-md-block">
   <div class="table-responsive">
   <table id="tickets" class="table table-bordered table-sm">
     <thead>
@@ -59,6 +61,7 @@
     </thead>
     <tbody></tbody>
   </table>
+  </div>
   </div>
 
 
@@ -281,6 +284,8 @@ async function loadTickets() {
 
   const tbody = document.querySelector('#tickets tbody');
   tbody.innerHTML = '';
+  const cardsContainer = document.getElementById('ticketCards');
+  if (cardsContainer) cardsContainer.innerHTML = '';
   let closedStarted = false;
   data.forEach(ticket => {
     const tr = document.createElement('tr');
@@ -314,6 +319,32 @@ async function loadTickets() {
     }
     tr.appendChild(actionTd);
     tbody.appendChild(tr);
+
+    if (cardsContainer) {
+      const card = document.createElement('div');
+      card.className = 'card mb-3';
+      card.style.fontSize = '0.95rem';
+      card.id = `ticket-${ticket.id}`;
+      const body = document.createElement('div');
+      body.className = 'card-body';
+      if (document.documentElement.dir === 'rtl') body.classList.add('text-end');
+      body.innerHTML =
+        `<p><strong>${t('id')}:</strong> ${ticket.id}</p>` +
+        `<p><strong>${t('description')}:</strong> ${ticket.description}</p>` +
+        `<p><strong>${t('room')}:</strong> ${ticket.room}</p>` +
+        `<p><strong>${t('openedBy')}:</strong> ${openedBy}</p>` +
+        `<p><strong>${t('closedBy')}:</strong> ${closedBy || '-'}</p>` +
+        `<p><strong>${t('status')}:</strong> <span class="badge ${ticket.closedAt ? 'bg-secondary' : 'bg-success'}">${statusText}</span></p>`;
+      if (!ticket.closedAt) {
+        const btn2 = document.createElement('button');
+        btn2.className = 'btn btn-sm btn-danger';
+        btn2.textContent = t('close');
+        btn2.onclick = () => closeTicket(ticket.id);
+        body.appendChild(btn2);
+      }
+      card.appendChild(body);
+      cardsContainer.appendChild(card);
+    }
   });
 }
 
