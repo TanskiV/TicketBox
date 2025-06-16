@@ -184,12 +184,16 @@ app.get('/api/tickets', (req, res) => {
 app.post('/api/tickets', (req, res) => {
   const tickets = loadTickets();
   const body = req.body || {};
+  const { description, room, openedBy } = body;
+  if (!description || !room || !openedBy) {
+    return res.status(400).json({ error: 'missing fields' });
+  }
   const ticket = {
-    id: Date.now().toString(),
-    description: body.description || '',
+    id: crypto.randomUUID(),
+    description,
     departmentId: body.departmentId || '',
-    room: body.room || '',
-    openedBy: body.openedBy || '',
+    room,
+    openedBy,
     openedAt: new Date().toISOString(),
     closedAt: null,
     closedBy: null,
