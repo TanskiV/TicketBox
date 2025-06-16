@@ -343,3 +343,14 @@ th.sorted-desc::after {
 tbody tr.divider td {
   border-top: 2px solid #ccc;
 }
+
+/* Navbar adjustments */
+.navbar-brand img {
+  height: 40px;
+}
+@media (max-width: 600px) {
+  .navbar-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+}
