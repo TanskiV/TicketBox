@@ -71,6 +71,10 @@
 let currentUser = null;
 let sortKey = null;
 let sortAsc = true;
+function authHeaders(){
+  const token = localStorage.getItem('token');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
 async function requireLogin(){
   const stored = localStorage.getItem('user');
   if(!stored){
@@ -190,13 +194,14 @@ document.getElementById('langToggle').addEventListener('click', () => {
   setLang(currentLang === 'en' ? 'he' : 'en');
 });
 document.getElementById('logout').addEventListener('click', async () => {
-  await fetch('/api/logout', {method:'POST'});
+  await fetch('/api/logout', {method:'POST', headers: authHeaders()});
   localStorage.removeItem('user');
+  localStorage.removeItem('token');
   window.location.href = '/login.html';
 });
 
 async function loadDepartmentsList() {
-  const res = await fetch('/api/departments');
+  const res = await fetch('/api/departments', { headers: authHeaders() });
   departments = await res.json();
   const select = document.getElementById('deptSelect');
   if (select) {
@@ -222,7 +227,7 @@ function renderDeptList() {
     const del = document.createElement('button');
     del.textContent = 'x';
     del.onclick = async () => {
-      await fetch(`/api/departments/${d.id}`, {method:'DELETE'});
+      await fetch(`/api/departments/${d.id}`, {method:'DELETE', headers: authHeaders()});
       loadTickets();
     };
     li.appendChild(del);
@@ -251,7 +256,7 @@ async function loadTickets() {
   await loadDepartmentsList();
   const room = document.getElementById('filterRoom').value;
   const params = room ? '?room=' + encodeURIComponent(room) : '';
-  const res = await fetch('/api/tickets' + params);
+  const res = await fetch('/api/tickets' + params, { headers: authHeaders() });
   let data = await res.json();
 
   const getValue = (ticket) => {
@@ -363,7 +368,7 @@ async function closeTicket(id) {
   const body = { userId: currentUser.username, comment: '' };
   await fetch(`/api/tickets/${id}/close`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body)
   });
   loadTickets();
@@ -386,7 +391,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
   try {
     const res = await fetch('/api/tickets', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(body)
     });
     if (!res.ok) {
@@ -412,7 +417,7 @@ const deptForm = document.getElementById('deptForm');
 if (deptForm) {
   deptForm.addEventListener('submit', async e => {
     e.preventDefault();
-    await fetch('/api/departments', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('newDept').value})});
+    await fetch('/api/departments', {method:'POST', headers:{'Content-Type':'application/json', ...authHeaders()}, body: JSON.stringify({name: document.getElementById('newDept').value})});
     e.target.reset();
     loadTickets();
   });
