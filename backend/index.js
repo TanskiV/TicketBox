@@ -5,9 +5,24 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
+const mongoose = require('mongoose');
 const { Ticket, User, Department, Photo } = require('./models');
 
 const PORT = process.env.PORT || 3000;
+
+if (!process.env.MONGODB_URI) {
+  throw new Error('MONGODB_URI is not defined');
+}
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) {
@@ -260,6 +275,9 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Сервер запущен на порту ${PORT}`);
+mongoose.connection.once('open', () => {
+  console.log('MongoDB connected');
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
