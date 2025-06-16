@@ -1,13 +1,1 @@
-[
-  {
-    "id": 100001,
-    "description": "דוש לא ודבד",
-    "departmentId": "",
-    "room": "356",
-    "openedBy": "admin",
-    "openedAt": "2025-06-16T09:30:09.321Z",
-    "closedAt": "2025-06-16T09:30:46.167Z",
-    "closedBy": "Erez",
-    "comment": ""
-  }
-]
+[]
