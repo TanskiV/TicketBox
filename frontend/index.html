@@ -24,15 +24,15 @@
   <table id="tickets">
     <thead>
       <tr>
-        <th data-i18n="id">ID</th>
-        <th data-i18n="description">Description</th>
-        <th data-i18n="room">Room</th>
-        <th data-i18n="department">Department</th>
-        <th data-i18n="openedBy">Opened by</th>
-        <th data-i18n="closedBy">Closed by</th>
-        <th data-i18n="openedAt">Opened at</th>
-        <th data-i18n="closedAt">Closed at</th>
-        <th data-i18n="status">Status</th>
+        <th data-i18n="id" data-key="id" class="sortable">ID</th>
+        <th data-i18n="description" data-key="description" class="sortable">Description</th>
+        <th data-i18n="room" data-key="room" class="sortable">Room</th>
+        <th data-i18n="department" data-key="department" class="sortable">Department</th>
+        <th data-i18n="openedBy" data-key="openedBy" class="sortable">Opened by</th>
+        <th data-i18n="closedBy" data-key="closedBy" class="sortable">Closed by</th>
+        <th data-i18n="openedAt" data-key="openedAt" class="sortable">Opened at</th>
+        <th data-i18n="closedAt" data-key="closedAt" class="sortable">Closed at</th>
+        <th data-i18n="status" data-key="status" class="sortable">Status</th>
         <th data-i18n="actions">Actions</th>
       </tr>
     </thead>
@@ -44,6 +44,8 @@
 
 <script>
 let currentUser = null;
+let sortKey = null;
+let sortAsc = true;
 async function requireLogin(){
   const stored = localStorage.getItem('user');
   if(!stored){
@@ -192,16 +194,78 @@ function renderDeptList() {
   });
 }
 
+function setupSorting() {
+  document.querySelectorAll('#tickets th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (sortKey === key) {
+        sortAsc = !sortAsc;
+      } else {
+        sortKey = key;
+        sortAsc = true;
+      }
+      document.querySelectorAll('#tickets th.sortable').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+      th.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
+      loadTickets();
+    });
+  });
+}
+
 async function loadTickets() {
   await loadDepartmentsList();
   const room = document.getElementById('filterRoom').value;
   const params = room ? '?room=' + encodeURIComponent(room) : '';
   const res = await fetch('/api/tickets' + params);
-  const data = await res.json();
+  let data = await res.json();
+
+  const getValue = (ticket) => {
+    if (!sortKey) return null;
+    if (sortKey === 'department') {
+      const dept = departments.find(d => d.id === ticket.departmentId);
+      return dept ? dept.name : '';
+    }
+    if (sortKey === 'status') {
+      return ticket.closedAt ? t('closedStatus') : t('openStatus');
+    }
+    if (sortKey === 'openedAt' || sortKey === 'closedAt') {
+      return ticket[sortKey] ? new Date(ticket[sortKey]) : null;
+    }
+    return ticket[sortKey];
+  };
+
+  const sortArr = (arr) => arr.sort((a, b) => {
+    const av = getValue(a);
+    const bv = getValue(b);
+    if (av === bv) return 0;
+    if (av === undefined || av === null) return sortAsc ? -1 : 1;
+    if (bv === undefined || bv === null) return sortAsc ? 1 : -1;
+    if (av > bv) return sortAsc ? 1 : -1;
+    if (av < bv) return sortAsc ? -1 : 1;
+    return 0;
+  });
+
+  let openTickets = data.filter(t => !t.closedAt);
+  let closedTickets = data.filter(t => t.closedAt);
+
+  if (sortKey) {
+    sortArr(openTickets);
+    sortArr(closedTickets);
+  } else {
+    openTickets.sort((a, b) => new Date(b.openedAt) - new Date(a.openedAt));
+    closedTickets.sort((a, b) => new Date(b.closedAt) - new Date(a.closedAt));
+  }
+
+  data = [...openTickets, ...closedTickets];
+
   const tbody = document.querySelector('#tickets tbody');
   tbody.innerHTML = '';
+  let closedStarted = false;
   data.forEach(ticket => {
     const tr = document.createElement('tr');
+    if (ticket.closedAt && !closedStarted) {
+      closedStarted = true;
+      tr.classList.add('divider');
+    }
     const opened = ticket.openedAt ? new Date(ticket.openedAt).toLocaleString(currentLang) : '';
     const closed = ticket.closedAt ? new Date(ticket.closedAt).toLocaleString(currentLang) : '';
     const dept = departments.find(d => d.id === ticket.departmentId);
@@ -268,6 +332,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
 });
 
 setLang(getLang());
+setupSorting();
 
 const deptForm = document.getElementById('deptForm');
 if (deptForm) {
