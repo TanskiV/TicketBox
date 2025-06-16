@@ -29,3 +29,14 @@
 
 При обращении к `http://localhost:3000` откроется простая страница с формой добавления
 заявок и таблицей существующих. Данные хранятся в файле `backend/data/tickets.json`.
+
+## Deploy to Render
+
+1. Create a new **Web Service** in your Render account and connect this
+   repository.
+2. Set the build and start commands:
+   ```bash
+   npm install
+   npm start
+   ```
+3. Render will provide the `PORT` environment variable automatically.

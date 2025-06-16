@@ -11,6 +11,15 @@
   margin: 0 auto;
 }
 
+.header-logo {
+  text-align: center;
+  margin: 20px 0;
+}
+.header-logo img {
+  height: 80px;
+  object-fit: contain;
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -144,6 +153,37 @@ form button {
 
 form button:hover {
   background-color: #004d99;
+}
+
+.ticket-form {
+  background: #f9f9f9;
+  padding: 20px;
+  margin: 0 auto 30px;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.ticket-form textarea,
+.ticket-form input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+.ticket-form button {
+  background-color: #005baa;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ticket-form button:hover {
+  background-color: #004080;
 }
 
 @media (max-width: 600px) {
