@@ -316,22 +316,46 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'index.html'));
 });
 
-mongoose.connection.once('open', async () => {
-  console.log('MongoDB connected');
+let server;
+async function start() {
+  await new Promise((resolve) => {
+    mongoose.connection.once('open', async () => {
+      console.log('MongoDB connected');
 
-  const userCount = await User.countDocuments();
-  if (userCount === 0) {
-    const username = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
-    const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin';
-    await User.create({
-      username,
-      passwordHash: bcrypt.hashSync(password, 10),
-      role: 'admin'
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        const username = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
+        const password = process.env.DEFAULT_ADMIN_PASSWORD || 'admin';
+        await User.create({
+          username,
+          passwordHash: bcrypt.hashSync(password, 10),
+          role: 'admin'
+        });
+        console.log(`Default admin created: ${username}/${password}`);
+      }
+
+      server = app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        resolve();
+      });
     });
-    console.log(`Default admin created: ${username}/${password}`);
-  }
-
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
   });
-});
+  return server;
+}
+
+async function stop() {
+  await new Promise((resolve, reject) => {
+    if (server) {
+      server.close(err => (err ? reject(err) : resolve()));
+    } else {
+      resolve();
+    }
+  });
+  await mongoose.connection.close();
+}
+
+if (require.main === module) {
+  start();
+}
+
+module.exports = { app, start, stop };
