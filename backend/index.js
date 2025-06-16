@@ -100,6 +100,8 @@ function requireAdmin(req, res, next) {
 }
 
 const FRONTEND = path.join(__dirname, '../frontend');
+const PUBLIC_DIR = path.join(__dirname, '../public');
+const SRC_DIR = path.join(__dirname, '../src');
 
 app.get('/', (req, res) => {
   if (req.user) {
@@ -118,6 +120,8 @@ app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'admin.html'));
 });
 
+app.use(express.static(PUBLIC_DIR));
+app.use(express.static(SRC_DIR));
 app.use(express.static(FRONTEND));
 
 app.get('/api/status', (req, res) => {
