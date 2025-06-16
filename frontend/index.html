@@ -7,23 +7,23 @@
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <img src="logo.png" alt="Hotel Sharon" class="logo" />
-      <div class="header-title">
-        <h1>TicketBox – Fault Management</h1>
-        <h3>Hotel Sharon</h3>
-      </div>
-    </header>
+    <div class="header-logo">
+      <a href="https://sharon.co.il" target="_blank">
+        <img src="logo.png" alt="Hotel Sharon" />
+      </a>
+    </div>
     <button id="langToggle"></button>
     <button id="logout" data-i18n="logout"></button>
     <a href="index.html">🏠 Home</a>
 
-  <h2 data-i18n="newTicket">New Ticket</h2>
-  <form id="addForm">
-    <textarea id="desc" data-i18n-placeholder="description" required></textarea>
-    <input type="text" id="room" data-i18n-placeholder="room" required />
-    <button type="submit" data-i18n="submit">Add Ticket</button>
-  </form>
+  <div class="ticket-form">
+    <h2 data-i18n="newTicket">New Ticket</h2>
+    <form id="addForm">
+      <textarea id="desc" data-i18n-placeholder="description" required></textarea>
+      <input type="text" id="room" data-i18n-placeholder="room" required />
+      <button type="submit" data-i18n="submit">Add Ticket</button>
+    </form>
+  </div>
 
   <h2 data-i18n="tickets">Tickets</h2>
   <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" /></label>
