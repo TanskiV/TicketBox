@@ -32,7 +32,7 @@
       if (file) fd.append('photo', file);
       const res = await fetch('/api/public-ticket', { method: 'POST', body: fd });
       if (res.ok) {
-        alert('Спасибо! Заявка успешно отправлена.');
+        alert('Спасибо! Ваша заявка получена.');
         e.target.reset();
       } else {
         const err = await res.json().catch(() => ({ error: 'Server error' }));
