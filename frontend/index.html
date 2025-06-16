@@ -175,6 +175,17 @@ function getLang() {
   return navigator.language && navigator.language.startsWith('he') ? 'he' : 'en';
 }
 
+function formatDate(str) {
+  if (!str) return '';
+  const d = new Date(str);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
 document.getElementById('langToggle').addEventListener('click', () => {
   setLang(currentLang === 'en' ? 'he' : 'en');
 });
@@ -293,8 +304,8 @@ async function loadTickets() {
       closedStarted = true;
       tr.classList.add('divider');
     }
-    const opened = ticket.openedAt ? new Date(ticket.openedAt).toLocaleString(currentLang) : '';
-    const closed = ticket.closedAt ? new Date(ticket.closedAt).toLocaleString(currentLang) : '';
+    const opened = formatDate(ticket.openedAt);
+    const closed = formatDate(ticket.closedAt);
     const dept = departments.find(d => d.id === ticket.departmentId);
     const openedBy = ticket.openedBy;
     const closedBy = ticket.closedBy || '';
@@ -386,6 +397,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
     const saved = await res.json();
     console.log('Ticket saved', saved);
     e.target.reset();
+    alert('Заявка успешно добавлена!');
     loadTickets();
   } catch (err) {
     console.log(err);

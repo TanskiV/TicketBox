@@ -87,6 +87,13 @@ document.getElementById('langToggle').addEventListener('click', () => {
   setLang(currentLang === 'en' ? 'he' : 'en');
 });
 setLang(getLang());
+const storedUser = localStorage.getItem('user');
+if (storedUser) {
+  const u = JSON.parse(storedUser);
+  window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
+} else {
+  check();
+}
 async function check() {
   const res = await fetch('/api/me');
   if (res.ok) {
@@ -97,7 +104,6 @@ async function check() {
   }
   localStorage.removeItem('user');
 }
-check();
 loginForm.addEventListener('submit', async e => {
   e.preventDefault();
   const body = {username: username.value, password: password.value};
