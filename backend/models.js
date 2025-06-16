@@ -1,8 +1,18 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hotel_sharon';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/ticketbox';
 
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  dbName: 'ticketbox',
+});
+
+mongoose.connection.once('open', () => {
+  console.log('✅ Connected to MongoDB');
+});
+mongoose.connection.on('error', console.error);
 
 const DepartmentSchema = new mongoose.Schema({
   name: { type: String, required: true }
