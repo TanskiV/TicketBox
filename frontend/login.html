@@ -89,7 +89,8 @@ document.getElementById('langToggle').addEventListener('click', () => {
 setLang(getLang());
 check();
 async function check() {
-  const res = await fetch('/api/me');
+  const token = localStorage.getItem('token');
+  const res = await fetch('/api/me', token ? { headers: { 'Authorization': 'Bearer ' + token } } : {});
   if (res.ok) {
     const u = await res.json();
     localStorage.setItem('user', JSON.stringify(u));
@@ -103,9 +104,10 @@ loginForm.addEventListener('submit', async e => {
   const body = {username: username.value, password: password.value};
   const res = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   if(res.ok){
-    const u = await res.json();
-    localStorage.setItem('user', JSON.stringify(u));
-    window.location.href = u.role === 'admin' ? '/admin.html' : '/index.html';
+    const data = await res.json();
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    window.location.href = data.user.role === 'admin' ? '/admin.html' : '/index.html';
   } else {
     error.textContent = t('invalidCredentials');
   }
