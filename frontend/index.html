@@ -17,13 +17,13 @@
 
   <div class="ticket-form form-section">
     <h2 data-i18n="newTicket">New Ticket</h2>
-    <form id="addForm" class="container mt-3">
+    <form id="addForm" class="container mt-3" autocomplete="off">
       <div class="row g-2">
         <div class="col-12 col-sm-6">
-          <textarea id="desc" data-i18n-placeholder="description" class="form-control" required></textarea>
+          <textarea id="desc" data-i18n-placeholder="description" class="form-control" autocomplete="off" required></textarea>
         </div>
         <div class="col-12 col-sm-4">
-          <input type="text" id="room" data-i18n-placeholder="room" class="form-control" required />
+          <input type="text" id="room" data-i18n-placeholder="room" class="form-control" autocomplete="off" required />
         </div>
         <div class="col-12 col-sm-2">
           <button type="submit" class="btn btn-primary w-100" data-i18n="addTicket">Add Ticket</button>
@@ -33,7 +33,7 @@
   </div>
 
   <h2 data-i18n="tickets">Tickets</h2>
-  <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" /></label>
+  <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" autocomplete="off" /></label>
   <button onclick="loadTickets()" data-i18n="refresh" class="btn btn-secondary mb-2">Refresh</button>
   <div id="ticketCards" class="d-md-none"></div>
   <div class="d-none d-md-block">

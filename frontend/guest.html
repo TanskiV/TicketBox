@@ -15,9 +15,9 @@
   <div id="header"></div>
   <div class="container">
     <h2 class="text-center mt-3" data-i18n="heading">Report an Issue</h2>
-    <form id="guestForm" class="ticket-form form-section">
-      <input type="text" id="room" class="form-control mb-2" data-i18n-placeholder="room" required />
-      <textarea id="desc" class="form-control mb-2" data-i18n-placeholder="description"></textarea>
+    <form id="guestForm" class="ticket-form form-section" autocomplete="off">
+      <input type="text" id="room" class="form-control mb-2" data-i18n-placeholder="room" autocomplete="off" required />
+      <textarea id="desc" class="form-control mb-2" data-i18n-placeholder="description" autocomplete="off"></textarea>
       <input type="file" id="photo" class="form-control mb-2" accept="image/*" />
       <button type="submit" class="btn btn-primary w-100" data-i18n="submit">Submit</button>
     </form>
