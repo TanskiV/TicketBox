@@ -59,13 +59,41 @@
   </div>
   </div>
 
-
-
+  <div class="mt-4">
+    <div class="row g-2 mb-2">
+      <div class="col-auto">
+        <input type="date" id="fromDate" class="form-control" />
+      </div>
+      <div class="col-auto">
+        <input type="date" id="toDate" class="form-control" />
+      </div>
+      <div class="col-auto">
+        <input type="text" id="closedRoom" class="form-control" data-i18n-placeholder="room" />
+      </div>
+      <div class="col-auto">
+        <button id="showClosed" class="btn btn-secondary" data-i18n="showClosed">Show closed tickets</button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table id="closedTable" class="table table-bordered table-sm">
+        <thead>
+          <tr>
+            <th data-i18n="id">ID</th>
+            <th data-i18n="description">Description</th>
+            <th data-i18n="room">Room</th>
+            <th data-i18n="closedAt">Closed at</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
 <script>
 let currentUser = null;
 let sortKey = null;
 let sortAsc = true;
+let editId = null;
 function authHeaders(){
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': 'Bearer ' + token } : {};
@@ -108,6 +136,11 @@ const translations = {
     manageDepartments: 'Manage Departments',
     manageStaff: 'Manage Staff',
     logout: 'Logout',
+    edit: 'Edit',
+    save: 'Save',
+    showClosed: 'Show closed tickets',
+    fromDate: 'From',
+    toDate: 'To',
     openStatus: 'Open',
       closedStatus: 'Closed',
       close: 'Close',
@@ -140,7 +173,12 @@ const translations = {
       selectUser: '\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3',
       manageDepartments: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05D7\u05DC\u05E7\u05D5\u05EA',
       manageStaff: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD',
-      logout: '\u05D9\u05E6\u05D9\u05D0\u05D4'
+      logout: '\u05D9\u05E6\u05D9\u05D0\u05D4',
+      edit: '\u05E2\u05E8\u05D5\u05DA',
+      save: '\u05E9\u05DE\u05D5\u05E8',
+      showClosed: '\u05D4\u05E6\u05D2 \u05EA\u05E7\u05DC\u05D5\u05EA \u05E1\u05D2\u05D5\u05E8\u05D5\u05EA',
+      fromDate: '\u05DE',
+      toDate: '\u05E2\u05D3'
     },
     ru: {
     title: 'Hotel Sharon - TicketBox',
@@ -164,6 +202,11 @@ const translations = {
     manageDepartments: '\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043E\u0442\u0434\u0435\u043B\u0430\u043C\u0438',
     manageStaff: '\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u0435\u0440\u0441\u043E\u043D\u0430\u043B\u043E\u043C',
     logout: '\u0412\u044B\u0445\u043E\u0434',
+    edit: '\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C',
+    save: '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C',
+    showClosed: '\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0437\u0430\u043A\u0440\u044B\u0442\u044B\u0435',
+    fromDate: '\u0441',
+    toDate: '\u043F\u043E',
     openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
       closedStatus: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
       close: '\u0417\u0430\u043A\u0440\u044B\u0442\u044C',
@@ -272,8 +315,10 @@ function setupSorting() {
 async function loadTickets() {
   await loadDepartmentsList();
   const room = document.getElementById('filterRoom').value;
-  const params = room ? '?room=' + encodeURIComponent(room) : '';
-  const res = await fetch('/api/tickets' + params, { headers: authHeaders() });
+  const params = new URLSearchParams();
+  params.set('status', 'open');
+  if (room) params.set('room', room);
+  const res = await fetch('/api/tickets?' + params.toString(), { headers: authHeaders() });
   let data = await res.json();
 
   const getValue = (ticket) => {
@@ -302,8 +347,8 @@ async function loadTickets() {
     return 0;
   });
 
-  let openTickets = data.filter(t => !t.closedAt);
-  let closedTickets = data.filter(t => t.closedAt);
+  let openTickets = data;
+  let closedTickets = [];
 
   if (sortKey) {
     sortArr(openTickets);
@@ -346,6 +391,11 @@ async function loadTickets() {
     const actionTd = document.createElement('td');
     actionTd.setAttribute('data-label', t('actions'));
     if (!ticket.closedAt) {
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-sm btn-secondary me-1';
+      editBtn.textContent = t('edit');
+      editBtn.onclick = () => openEdit(ticket);
+      actionTd.appendChild(editBtn);
       const btn = document.createElement('button');
       btn.className = 'btn btn-sm btn-danger';
       btn.textContent = t('close');
@@ -372,6 +422,11 @@ async function loadTickets() {
         `<p><strong>${t('closedBy')}:</strong> ${closedBy || '-'}</p>` +
         `<p><strong>${t('status')}:</strong> <span class="badge ${ticket.closedAt ? 'bg-secondary' : 'bg-success'}">${statusText}</span></p>`;
       if (!ticket.closedAt) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-sm btn-secondary me-1';
+        editBtn.textContent = t('edit');
+        editBtn.onclick = () => openEdit(ticket);
+        body.appendChild(editBtn);
         const btn2 = document.createElement('button');
         btn2.className = 'btn btn-sm btn-danger';
         btn2.textContent = t('close');
@@ -392,6 +447,32 @@ async function closeTicket(id) {
     body: JSON.stringify(body)
   });
   loadTickets();
+}
+
+function openEdit(ticket) {
+  editId = ticket.id;
+  document.getElementById('editDesc').value = ticket.description;
+  document.getElementById('editRoom').value = ticket.room;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
+}
+
+async function loadClosedTickets() {
+  const params = new URLSearchParams();
+  const room = document.getElementById('closedRoom').value.trim();
+  if (room) params.set('room', room);
+  const from = document.getElementById('fromDate').value;
+  const to = document.getElementById('toDate').value;
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  const res = await fetch('/api/tickets/closed?' + params.toString(), { headers: authHeaders() });
+  const data = await res.json();
+  const tbody = document.querySelector('#closedTable tbody');
+  tbody.innerHTML = '';
+  data.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td><td>${formatDate(t.closedAt)}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
 document.getElementById('addForm').addEventListener('submit', async e => {
@@ -443,6 +524,19 @@ if (deptForm) {
   });
 }
 
+document.getElementById('showClosed').addEventListener('click', loadClosedTickets);
+document.getElementById('editForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!editId) return;
+  const body = {
+    description: document.getElementById('editDesc').value.trim(),
+    room: document.getElementById('editRoom').value.trim()
+  };
+  await fetch('/api/tickets/' + editId, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).hide();
+  loadTickets();
+});
+
 // No staff management or close form required
 document.body.addEventListener('click', e => {
   if (e.target.classList.contains('photo-thumb')) {
@@ -458,6 +552,32 @@ document.body.addEventListener('click', e => {
         <div class="modal-body p-0">
           <img id="modalImage" src="" class="img-fluid w-100" alt="photo">
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="editForm">
+          <div class="modal-header">
+            <h5 class="modal-title" data-i18n="edit">Edit</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="editDesc" class="form-label" data-i18n="description">Description</label>
+              <textarea id="editDesc" class="form-control" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="editRoom" class="form-label" data-i18n="room">Room</label>
+              <input type="text" id="editRoom" class="form-control" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" data-i18n="save">Save</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
