@@ -8,7 +8,9 @@ const Department = mongoose.model('Department', DepartmentSchema);
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  name: String,
+  email: String,
+  role: { type: String, enum: ['admin', 'superuser', 'user'], default: 'user' },
   departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department' }
 });
 const User = mongoose.model('User', UserSchema);

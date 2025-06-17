@@ -7,7 +7,7 @@ test('Ticket isClosed defaults to false', () => {
 
 test('User role enum and default', () => {
   const rolePath = User.schema.path('role');
-  expect(rolePath.enumValues).toEqual(['admin', 'user']);
+  expect(rolePath.enumValues).toEqual(['admin', 'superuser', 'user']);
   expect(rolePath.defaultValue).toBe('user');
 });
 

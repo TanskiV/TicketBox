@@ -13,14 +13,35 @@
 </head>
   <body>
   <div id="header"></div>
-  <div class="container">
-    <h2 class="text-center mt-3" data-i18n="heading">Report an Issue</h2>
-    <form id="guestForm" class="ticket-form form-section" autocomplete="off">
-      <input type="text" id="room" class="form-control mb-2" data-i18n-placeholder="room" autocomplete="off" required />
-      <textarea id="desc" class="form-control mb-2" data-i18n-placeholder="description" autocomplete="off"></textarea>
-      <input type="file" id="photo" class="form-control mb-2" accept="image/*" />
-      <button type="submit" class="btn btn-primary w-100" data-i18n="submit">Submit</button>
-    </form>
+  <div class="container mt-4">
+    <div class="card shadow">
+      <div class="card-header">פתיחת תקלה לאורחים</div>
+      <div class="card-body">
+        <form id="guestForm" class="ticket-form" autocomplete="off" novalidate>
+          <div class="mb-3">
+            <label for="room" class="form-label" data-i18n="room">Room</label>
+            <input type="text" id="room" class="form-control" data-i18n-placeholder="room" required />
+            <div class="invalid-feedback" data-i18n="roomRequired">Room is required</div>
+          </div>
+          <div class="mb-3">
+            <label for="desc" class="form-label" data-i18n="description">Description</label>
+            <textarea id="desc" class="form-control" data-i18n-placeholder="description" required></textarea>
+            <div class="invalid-feedback">Required</div>
+          </div>
+          <div class="mb-3">
+            <label for="dept" class="form-label" data-i18n="department">Department</label>
+            <select id="dept" class="form-select" required></select>
+            <div class="invalid-feedback">Required</div>
+          </div>
+          <div class="mb-3">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="file" id="photo" class="form-control" accept="image/*" />
+          </div>
+          <button type="submit" class="btn btn-primary" data-i18n="submit">Submit</button>
+        </form>
+        <div id="success" class="alert alert-success mt-3 d-none" role="alert"></div>
+      </div>
+    </div>
   </div>
   <script>
     const translations = {
@@ -31,6 +52,7 @@
         description: 'Description',
         submit: 'Submit',
         roomRequired: 'Room is required',
+        selectDepartment: 'Select Department',
         success: 'Thank you! Your ticket has been received.',
         serverError: 'Server error'
       },
@@ -41,6 +63,7 @@
         description: '\u05EA\u05D9\u05D0\u05D5\u05E8',
         submit: '\u05E9\u05DC\u05D7',
         roomRequired: '\u05D7\u05D5\u05D1\u05D4 \u05DC\u05E6\u05D9\u05D9\u05DF \u05D7\u05D3\u05E8',
+        selectDepartment: '\u05D1\u05D7\u05E8 \u05DE\u05D7\u05DC\u05E7\u05D4',
         success: '\u05EA\u05D5\u05D3\u05D4! \u05D4\u05E4\u05E0\u05D9\u05D9\u05D4 \u05E0\u05E7\u05DC\u05D4.',
         serverError: '\u05E9\u05D2\u05D9\u05D0\u05EA \u05E9\u05E8\u05EA'
       },
@@ -51,6 +74,7 @@
         description: '\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435',
         submit: '\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C',
         roomRequired: '\u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043D\u043E\u043C\u0435\u0440 \u043A\u043E\u043C\u043D\u0430\u0442\u044B',
+        selectDepartment: '\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u043E\u0442\u0434\u0435\u043B',
         success: '\u0421\u043F\u0430\u0441\u0438\u0431\u043E! \u0412\u0430\u0448\u0430 \u0437\u0430\u044F\u0432\u043A\u0430 \u043F\u043E\u043B\u0443\u0447\u0435\u043D\u0430.',
         serverError: '\u041E\u0448\u0438\u0431\u043A\u0430 \u0441\u0435\u0440\u0432\u0435\u0440\u0430'
       }
@@ -69,25 +93,45 @@
 
     setLang(getLang());
 
+    async function loadDepts(){
+      const res = await fetch('/api/departments');
+      const list = await res.json();
+      const sel = document.getElementById('dept');
+      sel.innerHTML = '<option value="">'+t('selectDepartment')+'</option>';
+      list.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; sel.appendChild(o); });
+    }
+
     document.getElementById('guestForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const room = document.getElementById('room').value.trim();
-      if (!room) { alert(t('roomRequired')); return; }
-      const description = document.getElementById('desc').value.trim();
+      const roomEl = document.getElementById('room');
+      const descEl = document.getElementById('desc');
+      const deptEl = document.getElementById('dept');
+      let valid = true;
+      if(!roomEl.value.trim()){ roomEl.classList.add('is-invalid'); valid=false; } else roomEl.classList.remove('is-invalid');
+      if(!descEl.value.trim()){ descEl.classList.add('is-invalid'); valid=false; } else descEl.classList.remove('is-invalid');
+      if(!deptEl.value){ deptEl.classList.add('is-invalid'); valid=false; } else deptEl.classList.remove('is-invalid');
+      if(!valid) return;
       const fd = new FormData();
-      fd.append('room', room);
-      fd.append('description', description);
+      fd.append('room', roomEl.value.trim());
+      fd.append('description', descEl.value.trim());
+      fd.append('departmentId', deptEl.value);
       const file = document.getElementById('photo').files[0];
       if (file) fd.append('photo', file);
       const res = await fetch('/api/public-ticket', { method: 'POST', body: fd });
+      const msg = document.getElementById('success');
       if (res.ok) {
-        alert(t('success'));
+        msg.textContent = t('success');
+        msg.classList.remove('d-none');
         e.target.reset();
       } else {
         const err = await res.json().catch(() => ({ error: t('serverError') }));
-        alert(err.error || t('serverError'));
+        msg.textContent = err.error || t('serverError');
+        msg.classList.remove('d-none');
+        msg.classList.replace('alert-success','alert-danger');
       }
     });
+
+    loadDepts();
   </script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 (function(){
   const translations = {
-    en: {home:'Home', report:'Report', admin:'Admin', login:'Login', logout:'Logout'},
-    he: {home:'\u05D3\u05E3 \u05D4\u05D1\u05D9\u05EA', report:'\u05E9\u05DC\u05D9\u05D7\u05EA \u05E4\u05E0\u05D9\u05D9\u05D4', admin:'\u05D0\u05D3\u05DE\u05D9\u05DF', login:'\u05DB\u05E0\u05D9\u05E1\u05D4', logout:'\u05D9\u05E6\u05D9\u05D0\u05D4'},
-    ru: {home:'\u0413\u043B\u0430\u0432\u043D\u0430\u044F', report:'\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u044F\u0432\u043A\u0443', admin:'\u0410\u0434\u043C\u0438\u043D', login:'\u0412\u0445\u043E\u0434', logout:'\u0412\u044B\u0445\u043E\u0434'}
+    en: {home:'Home', report:'Report', admin:'Admin', manageUsers:'Users', login:'Login', logout:'Logout'},
+    he: {home:'\u05D3\u05E3 \u05D4\u05D1\u05D9\u05EA', report:'\u05E9\u05DC\u05D9\u05D7\u05EA \u05E4\u05E0\u05D9\u05D9\u05D4', admin:'\u05D0\u05D3\u05DE\u05D9\u05DF', manageUsers:'\u05DE\u05E9\u05EA\u05DE\u05E9\u05D9\u05DD', login:'\u05DB\u05E0\u05D9\u05E1\u05D4', logout:'\u05D9\u05E6\u05D9\u05D0\u05D4'},
+    ru: {home:'\u0413\u043B\u0430\u0432\u043D\u0430\u044F', report:'\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u044F\u0432\u043A\u0443', admin:'\u0410\u0434\u043C\u0438\u043D', manageUsers:'\u041F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0438', login:'\u0412\u0445\u043E\u0434', logout:'\u0412\u044B\u0445\u043E\u0434'}
   };
   let lang = localStorage.getItem('lang') || (navigator.language && navigator.language.startsWith('he') ? 'he' : 'en');
 
@@ -35,6 +35,7 @@
     const userStr = localStorage.getItem('user');
     const link = document.getElementById('loginLogout');
     const adminLink = document.querySelector('.admin-only');
+    const usersLink = document.querySelector('.users-only');
     if(userStr){
       const user = JSON.parse(userStr);
       link.textContent = t('logout');
@@ -47,10 +48,12 @@
         window.location.href = '/login.html';
       });
       if(user.role === 'admin' && adminLink) adminLink.classList.remove('d-none');
+      if(usersLink && (user.role === 'admin' || user.role === 'superuser')) usersLink.classList.remove('d-none');
     } else {
       link.textContent = t('login');
       link.href = 'login.html';
       if(adminLink) adminLink.classList.add('d-none');
+      if(usersLink) usersLink.classList.add('d-none');
     }
   }
 
