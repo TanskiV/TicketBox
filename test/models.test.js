@@ -15,3 +15,8 @@ test('Department name is required', () => {
   const namePath = Department.schema.path('name');
   expect(namePath.isRequired).toBe(true);
 });
+
+test('Ticket has numeric ticketNumber', () => {
+  const numPath = Ticket.schema.path('ticketNumber');
+  expect(numPath.instance).toBe('Number');
+});

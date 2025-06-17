@@ -151,7 +151,8 @@ const translations = {
       closedStatus: 'Closed',
       close: 'Close',
       openedAt: 'Opened at',
-      closedAt: 'Closed at'
+      closedAt: 'Closed at',
+      noDepartment: 'Not selected'
     },
     he: {
     title: 'Hotel Sharon - TicketBox',
@@ -184,7 +185,8 @@ const translations = {
       save: '\u05E9\u05DE\u05D5\u05E8',
       showClosed: '\u05D4\u05E6\u05D2 \u05EA\u05E7\u05DC\u05D5\u05EA \u05E1\u05D2\u05D5\u05E8\u05D5\u05EA',
       fromDate: '\u05DE',
-      toDate: '\u05E2\u05D3'
+      toDate: '\u05E2\u05D3',
+      noDepartment: '\u05DC\u05D0 \u05E0\u05D1\u05D7\u05E8\u05D4'
     },
     ru: {
     title: 'Hotel Sharon - TicketBox',
@@ -213,6 +215,7 @@ const translations = {
     showClosed: '\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0437\u0430\u043A\u0440\u044B\u0442\u044B\u0435',
     fromDate: '\u0441',
     toDate: '\u043F\u043E',
+    noDepartment: '\u041D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043E',
     openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
       closedStatus: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
       close: '\u0417\u0430\u043A\u0440\u044B\u0442\u044C',
@@ -394,10 +397,11 @@ async function loadTickets() {
     const closedBy = ticket.closedBy || '';
     const statusClass = ticket.closedAt ? 'status-closed' : 'status-open';
     const statusText = ticket.closedAt ? t('closedStatus') : t('openStatus');
-    tr.innerHTML = `<td data-label="${t('id')}">${ticket.id}</td>` +
+    const displayId = ticket.ticketNumber || ticket.id;
+    tr.innerHTML = `<td data-label="${t('id')}">${displayId}</td>` +
                   `<td data-label="${t('description')}">${ticket.description}</td>` +
                   `<td data-label="${t('room')}">${ticket.room}</td>` +
-                  `<td data-label="${t('department')}">${dept ? dept.name : ''}</td>` +
+                  `<td data-label="${t('department')}">${dept ? dept.name : t('noDepartment')}</td>` +
                   `<td data-label="${t('photo')}">${ticket.photoUrl ? '<img src="' + ticket.photoUrl + '" class="photo-thumb" style="max-width:60px">' : ''}</td>` +
                   `<td data-label="${t('openedBy')}">${openedBy}</td>` +
                   `<td data-label="${t('closedBy')}">${closedBy}</td>` +
@@ -429,10 +433,12 @@ async function loadTickets() {
       const body = document.createElement('div');
       body.className = 'card-body';
       if (document.documentElement.dir === 'rtl') body.classList.add('text-end');
+      const displayId2 = ticket.ticketNumber || ticket.id;
       body.innerHTML =
-        `<p><strong>${t('id')}:</strong> ${ticket.id}</p>` +
+        `<p><strong>${t('id')}:</strong> ${displayId2}</p>` +
         `<p><strong>${t('description')}:</strong> ${ticket.description}</p>` +
         `<p><strong>${t('room')}:</strong> ${ticket.room}</p>` +
+        `<p><strong>${t('department')}:</strong> ${dept ? dept.name : t('noDepartment')}</p>` +
         (ticket.photoUrl ? `<p><img src="${ticket.photoUrl}" class="photo-thumb" style="max-width:100%"></p>` : '') +
         `<p><strong>${t('openedBy')}:</strong> ${openedBy}</p>` +
         `<p><strong>${t('closedBy')}:</strong> ${closedBy || '-'}</p>` +
@@ -566,7 +572,13 @@ document.getElementById('editForm').addEventListener('submit', async e => {
     room: document.getElementById('editRoom').value.trim(),
     departmentId: document.getElementById('editDept').value
   };
-  await fetch('/api/tickets/' + editId, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
+  if (!body.departmentId) { alert('Fill all fields'); return; }
+  const res = await fetch('/api/tickets/' + editId, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Server error' }));
+    alert(err.error || 'Server error');
+    return;
+  }
   bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).hide();
   loadTickets();
 });
