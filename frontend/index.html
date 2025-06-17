@@ -17,27 +17,21 @@
 
   <div class="ticket-form form-section">
     <h2 data-i18n="newTicket">New Ticket</h2>
-    <form id="addForm" class="container mt-3" autocomplete="off">
-      <div class="row g-2">
-        <div class="col-12 col-sm-6">
-          <textarea id="desc" data-i18n-placeholder="description" class="form-control" autocomplete="off" required></textarea>
-        </div>
-        <div class="col-12 col-sm-3">
-          <input type="text" id="room" data-i18n-placeholder="room" class="form-control" autocomplete="off" required />
-        </div>
-        <div class="col-12 col-sm-2">
-          <select id="deptSelect" class="form-select" required></select>
-        </div>
-        <div class="col-12 col-sm-1">
-          <button type="submit" class="btn btn-primary w-100" data-i18n="addTicket">Add Ticket</button>
-        </div>
+    <form id="addForm" autocomplete="off">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <textarea id="desc" data-i18n-placeholder="description" class="form-control" required></textarea>
+        <input type="text" id="room" data-i18n-placeholder="room" class="form-control" required />
+        <select id="deptSelect" class="form-select" required></select>
+        <button type="submit" class="btn btn-primary btn-sm" data-i18n="addTicket">Add Ticket</button>
       </div>
     </form>
   </div>
 
   <h2 data-i18n="tickets">Tickets</h2>
-  <label><span data-i18n="filterRoom">Filter by room</span>: <input type="text" id="filterRoom" autocomplete="off" /></label>
-  <button onclick="loadTickets()" data-i18n="refresh" class="btn btn-secondary mb-2">Refresh</button>
+  <form id="filterForm" class="d-flex align-items-center gap-2 mb-3" onsubmit="loadTickets(); return false;">
+    <input type="text" id="filterRoom" class="form-control" data-i18n-placeholder="filterRoom" autocomplete="off" />
+    <button type="submit" class="btn btn-outline-secondary btn-sm" data-i18n="refresh">Refresh</button>
+  </form>
   <div id="ticketCards" class="d-md-none"></div>
   <div class="d-none d-md-block">
   <div class="table-responsive">
@@ -150,6 +144,7 @@ const translations = {
     openStatus: 'Open',
       closedStatus: 'Closed',
       close: 'Close',
+      reopen: 'Reopen',
       openedAt: 'Opened at',
       closedAt: 'Closed at',
       noDepartment: 'Not selected',
@@ -175,6 +170,7 @@ const translations = {
     openStatus: '\u05E4\u05EA\u05D5\u05D7\u05D4',
       closedStatus: '\u05E1\u05D2\u05D5\u05E8\u05D4',
       close: '\u05E1\u05D2\u05D5\u05E8',
+      reopen: '\u05E4\u05EA\u05D5\u05D7 \u05DE\u05D7\u05D3\u05E9',
       openedAt: '\u05EA\u05D0\u05E8\u05D9\u05DA \u05E4\u05EA\u05D9\u05D7\u05D4',
       closedAt: '\u05EA\u05D0\u05E8\u05D9\u05DA \u05E1\u05D2\u05D9\u05E8\u05D4',
       openedBy: '\u05E0\u05E4\u05EA\u05D7 \u05E2\u05DC \u05D9\u05D3\u05D9',
@@ -228,6 +224,7 @@ const translations = {
     openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
       closedStatus: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
       close: '\u0417\u0430\u043A\u0440\u044B\u0442\u044C',
+      reopen: '\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0437\u0430\u043D\u043E\u0432\u043E',
       openedAt: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430 \u0432',
       closedAt: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430 \u0432'
     }
@@ -482,6 +479,15 @@ async function closeTicket(id) {
   loadTickets();
 }
 
+async function reopenTicket(id) {
+  await fetch(`/api/tickets/${id}/reopen`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() }
+  });
+  loadClosedTickets();
+  loadTickets();
+}
+
 async function openEdit(ticket) {
   editId = ticket.id;
   await loadDepartmentsList();
@@ -503,19 +509,20 @@ async function loadClosedTickets() {
   const data = await res.json();
   const tbody = document.querySelector('#closedTable tbody');
   tbody.innerHTML = '';
-  data.forEach((t, idx) => {
+  data.forEach((ticket, idx) => {
     const tr = document.createElement('tr');
-    const openedBy = t.openedBy || 'לא ידוע';
-    const closedBy = t.closedBy || 'לא ידוע';
-    const openDate = formatDate(t.openedAt);
-    const closeDate = formatDate(t.closedAt);
+    const openedBy = ticket.openedBy || 'לא ידוע';
+    const closedBy = ticket.closedBy || 'לא ידוע';
+    const openDate = formatDate(ticket.openedAt);
+    const closeDate = formatDate(ticket.closedAt);
     tr.innerHTML = `<td>${idx + 1}</td>` +
-                  `<td>${t.room}</td>` +
-                  `<td>${t.description}</td>` +
+                  `<td>${ticket.room}</td>` +
+                  `<td>${ticket.description}</td>` +
                   `<td>${openDate}</td>` +
                   `<td>${openedBy}</td>` +
                   `<td>${closeDate}</td>` +
-                  `<td>${closedBy}</td>`;
+                  `<td>${closedBy}</td>` +
+                  `<td><button class="btn btn-warning btn-sm" onclick="reopenTicket('${ticket.id}')">${t('reopen')}</button></td>`;
     tbody.appendChild(tr);
   });
 }

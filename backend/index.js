@@ -330,6 +330,21 @@ app.post('/api/tickets/:id/close', async (req, res) => {
   res.json(ticket);
 });
 
+// Переоткрыть заявку
+app.post('/api/tickets/:id/reopen', async (req, res) => {
+  const ticket = await Ticket.findById(req.params.id);
+  if (!ticket) return res.status(404).json({ error: 'not found' });
+  if (ticket.isClosed) {
+    ticket.isClosed = false;
+    ticket.closedAt = undefined;
+    ticket.closedBy = undefined;
+    await ticket.save();
+    console.log('Saved to DB');
+    sendEvent({ type: 'ticket:reopened', ticketId: ticket.id });
+  }
+  res.json(ticket);
+});
+
 // Обновить заявку
 app.patch('/api/tickets/:id', async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
