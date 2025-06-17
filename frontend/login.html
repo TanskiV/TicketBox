@@ -14,9 +14,9 @@
   <body>
   <div id="header"></div>
   <div class="container">
-  <form id="loginForm" class="container mt-3 form-section">
-    <input type="text" id="username" data-i18n-placeholder="login" class="form-control mb-2" required />
-    <input type="password" id="password" data-i18n-placeholder="password" class="form-control mb-2" required />
+  <form id="loginForm" class="container mt-3 form-section" autocomplete="on">
+    <input type="text" id="username" name="username" data-i18n-placeholder="login" class="form-control mb-2" autocomplete="username" autofocus required />
+    <input type="password" id="password" name="password" data-i18n-placeholder="password" class="form-control mb-2" autocomplete="current-password" required />
     <button type="submit" class="btn btn-primary w-100" data-i18n="signIn">Login</button>
   </form>
   <div id="error"></div>

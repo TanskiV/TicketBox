@@ -19,9 +19,9 @@
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
   <div class="panel form-section">
     <h3>Add New Department</h3>
-    <form id="deptForm" class="row g-2">
+    <form id="deptForm" class="row g-2" autocomplete="off">
       <div class="col">
-        <input type="text" id="newDept" class="form-control" required />
+        <input type="text" id="newDept" class="form-control" autocomplete="off" required />
       </div>
       <div class="col-auto">
         <button type="submit" class="btn btn-primary" data-i18n="add">Add</button>
@@ -33,12 +33,12 @@
   <h2 data-i18n="manageUsers">Manage Users</h2>
   <div class="panel form-section">
     <h3>Add User (Login Access)</h3>
-    <form id="userForm" class="row g-2 align-items-end">
+    <form id="userForm" class="row g-2 align-items-end" autocomplete="off">
       <div class="col-md-3">
-        <input type="text" id="newUsername" data-i18n-placeholder="login" class="form-control" required />
+        <input type="text" id="newUsername" data-i18n-placeholder="login" class="form-control" autocomplete="off" required />
       </div>
       <div class="col-md-3">
-        <input type="password" id="newPassword" data-i18n-placeholder="password" class="form-control" required />
+        <input type="password" id="newPassword" data-i18n-placeholder="password" class="form-control" autocomplete="new-password" required />
       </div>
       <div class="col-md-3">
         <select id="userDept" class="form-select"></select>
@@ -66,12 +66,12 @@
   <h2 data-i18n="changePassword">Change Password</h2>
   <div class="panel form-section">
     <h3>Change Password</h3>
-    <form id="passwordForm" class="row g-2">
+    <form id="passwordForm" class="row g-2" autocomplete="off">
       <div class="col-md-4">
         <select id="passwordUser" class="form-select"></select>
       </div>
       <div class="col-md-4">
-        <input type="password" id="adminPassword" class="form-control" placeholder="New Password" required />
+        <input type="password" id="adminPassword" class="form-control" placeholder="New Password" autocomplete="new-password" required />
       </div>
       <div class="col-md-4">
         <button type="submit" class="btn btn-primary w-100" data-i18n="change">Change</button>
