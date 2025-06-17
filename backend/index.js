@@ -216,6 +216,19 @@ app.get('/api/tickets', async (req, res) => {
   res.json(list);
 });
 
+// Получить закрытые заявки с фильтрами
+app.get('/api/tickets/closed', async (req, res) => {
+  const query = { isClosed: true };
+  if (req.query.room) query.room = req.query.room;
+  if (req.query.from || req.query.to) {
+    query.closedAt = {};
+    if (req.query.from) query.closedAt.$gte = new Date(req.query.from);
+    if (req.query.to) query.closedAt.$lte = new Date(req.query.to);
+  }
+  const tickets = await Ticket.find(query);
+  res.json(tickets);
+});
+
 // Public ticket submission with optional photo
 app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
   const { room = '', description = '' } = req.body || {};
@@ -272,6 +285,20 @@ app.post('/api/tickets/:id/close', async (req, res) => {
     console.log('Saved to DB');
     sendEvent({ type: 'ticket:closed', ticketId: ticket.id });
   }
+  res.json(ticket);
+});
+
+// Обновить заявку
+app.patch('/api/tickets/:id', async (req, res) => {
+  const ticket = await Ticket.findById(req.params.id);
+  if (!ticket) return res.status(404).json({ error: 'not found' });
+  if (ticket.isClosed) return res.status(400).json({ error: 'closed' });
+  const { description, room, departmentId } = req.body || {};
+  if (description !== undefined) ticket.description = description;
+  if (room !== undefined) ticket.room = room;
+  if (departmentId !== undefined) ticket.departmentId = departmentId;
+  await ticket.save();
+  console.log('Saved to DB');
   res.json(ticket);
 });
 
