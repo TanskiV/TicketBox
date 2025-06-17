@@ -336,11 +336,12 @@ app.patch('/api/tickets/:id', async (req, res) => {
   if (!ticket) return res.status(404).json({ error: 'not found' });
   if (ticket.isClosed) return res.status(400).json({ error: 'closed' });
   const { description, room, departmentId } = req.body || {};
+  const depId = departmentId || req.body.department;
   if (description !== undefined) ticket.description = description;
   if (room !== undefined) ticket.room = room;
-  if (departmentId !== undefined) {
-    if (!departmentId) return res.status(400).json({ error: 'missing fields' });
-    ticket.departmentId = departmentId;
+  if (depId !== undefined) {
+    if (!depId) return res.status(400).json({ error: 'missing fields' });
+    ticket.departmentId = depId;
   }
   await ticket.save();
   console.log('Saved to DB');
