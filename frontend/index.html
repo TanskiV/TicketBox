@@ -78,10 +78,13 @@
       <table id="closedTable" class="table table-bordered table-sm">
         <thead>
           <tr>
-            <th data-i18n="id">ID</th>
-            <th data-i18n="description">Description</th>
+            <th>#</th>
             <th data-i18n="room">Room</th>
+            <th data-i18n="description">Description</th>
+            <th data-i18n="openedAt">Opened at</th>
+            <th data-i18n="openedBy">Opened by</th>
             <th data-i18n="closedAt">Closed at</th>
+            <th data-i18n="closedBy">Closed by</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -254,7 +257,7 @@ function formatDate(str) {
   const year = d.getFullYear();
   const hours = String(d.getHours()).padStart(2, '0');
   const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+  return `${hours}:${minutes} ${day}/${month}/${year}`;
 }
 
 
@@ -468,9 +471,19 @@ async function loadClosedTickets() {
   const data = await res.json();
   const tbody = document.querySelector('#closedTable tbody');
   tbody.innerHTML = '';
-  data.forEach(t => {
+  data.forEach((t, idx) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td><td>${formatDate(t.closedAt)}</td>`;
+    const openedBy = t.openedBy || 'לא ידוע';
+    const closedBy = t.closedBy || 'לא ידוע';
+    const openDate = formatDate(t.openedAt);
+    const closeDate = formatDate(t.closedAt);
+    tr.innerHTML = `<td>${idx + 1}</td>` +
+                  `<td>${t.room}</td>` +
+                  `<td>${t.description}</td>` +
+                  `<td>${openDate}</td>` +
+                  `<td>${openedBy}</td>` +
+                  `<td>${closeDate}</td>` +
+                  `<td>${closedBy}</td>`;
     tbody.appendChild(tr);
   });
 }
