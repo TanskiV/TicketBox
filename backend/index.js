@@ -206,7 +206,11 @@ app.get('/api/tickets', async (req, res) => {
     query.isClosed = !open ? true : false;
   }
   if (req.query.room) query.room = req.query.room;
-  if (req.query.departmentId) query.departmentId = req.query.departmentId;
+  if (req.user && req.user.role !== 'admin') {
+    query.departmentId = req.user.departmentId;
+  } else if (req.query.departmentId) {
+    query.departmentId = req.query.departmentId;
+  }
   const tickets = await Ticket.find(query);
   const list = [];
   for (const t of tickets) {
@@ -224,6 +228,11 @@ app.get('/api/tickets/closed', async (req, res) => {
     query.closedAt = {};
     if (req.query.from) query.closedAt.$gte = new Date(req.query.from);
     if (req.query.to) query.closedAt.$lte = new Date(req.query.to);
+  }
+  if (req.user && req.user.role !== 'admin') {
+    query.departmentId = req.user.departmentId;
+  } else if (req.query.departmentId) {
+    query.departmentId = req.query.departmentId;
   }
   const tickets = await Ticket.find(query);
   res.json(tickets);
@@ -256,14 +265,14 @@ app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
 // Создать заявку
 app.post('/api/tickets', async (req, res) => {
   const body = req.body || {};
-  const { description, room } = body;
-  if (!description || !room) {
+  const { description, room, departmentId } = body;
+  if (!description || !room || !departmentId) {
     return res.status(400).json({ error: 'missing fields' });
   }
   const ticket = await Ticket.create({
     description,
     room,
-    departmentId: body.departmentId || null,
+    departmentId,
     openedBy: req.user ? req.user.username : 'guest',
     openedAt: new Date()
   });
