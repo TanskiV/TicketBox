@@ -154,7 +154,8 @@ const translations = {
       closedAt: 'Closed at',
       noDepartment: 'Not selected',
       editTicket: 'Edit Ticket',
-      departmentRequired: 'Department required'
+      departmentRequired: 'Department required',
+      ticketAdded: 'Ticket added successfully!'
     },
     he: {
     title: 'Hotel Sharon - TicketBox',
@@ -190,7 +191,8 @@ const translations = {
       toDate: '\u05E2\u05D3',
       noDepartment: '\u05DC\u05D0 \u05E0\u05D1\u05D7\u05E8\u05D4',
       editTicket: '\u05E2\u05E8\u05D9\u05DB\u05EA \u05EA\u05E7\u05DC\u05D4',
-      departmentRequired: '\u05DE\u05D7\u05DC\u05E7\u05D4 \u05E0\u05D3\u05E8\u05E9\u05EA'
+      departmentRequired: '\u05DE\u05D7\u05DC\u05E7\u05D4 \u05E0\u05D3\u05E8\u05E9\u05EA',
+      ticketAdded: '\u05D4\u05EA\u05E7\u05DC\u05D4 \u05E0\u05D5\u05E1\u05E4\u05D4 \u05D1\u05D4\u05E6\u05DC\u05D7\u05D4!'
     },
     ru: {
     title: 'Hotel Sharon - TicketBox',
@@ -222,6 +224,7 @@ const translations = {
     noDepartment: '\u041D\u0435 \u0432\u044B\u0431\u0440\u0430\u043D\u043E',
     editTicket: '\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0437\u0430\u044F\u0432\u043A\u0443',
     departmentRequired: '\u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B',
+    ticketAdded: '\u0417\u0430\u044F\u0432\u043A\u0430 \u0443\u0441\u043F\u0435\u0448\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0430!',
     openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
       closedStatus: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
       close: '\u0417\u0430\u043A\u0440\u044B\u0442\u044C',
@@ -550,7 +553,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
     const saved = await res.json();
     console.log('Ticket saved', saved);
     e.target.reset();
-    alert('Заявка успешно добавлена!');
+    alert(t('ticketAdded'));
     loadTickets();
   } catch (err) {
     console.log(err);
