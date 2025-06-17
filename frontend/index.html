@@ -22,10 +22,13 @@
         <div class="col-12 col-sm-6">
           <textarea id="desc" data-i18n-placeholder="description" class="form-control" autocomplete="off" required></textarea>
         </div>
-        <div class="col-12 col-sm-4">
+        <div class="col-12 col-sm-3">
           <input type="text" id="room" data-i18n-placeholder="room" class="form-control" autocomplete="off" required />
         </div>
         <div class="col-12 col-sm-2">
+          <select id="deptSelect" class="form-select" required></select>
+        </div>
+        <div class="col-12 col-sm-1">
           <button type="submit" class="btn btn-primary w-100" data-i18n="addTicket">Add Ticket</button>
         </div>
       </div>
@@ -274,6 +277,16 @@ async function loadDepartmentsList() {
       select.appendChild(opt);
     });
   }
+  const editSelect = document.getElementById('editDept');
+  if (editSelect) {
+    editSelect.innerHTML = `<option value="">${t('selectDepartment')}</option>`;
+    departments.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = d.name;
+      editSelect.appendChild(opt);
+    });
+  }
   renderDeptList();
 }
 
@@ -454,6 +467,9 @@ async function closeTicket(id) {
 
 function openEdit(ticket) {
   editId = ticket.id;
+  loadDepartmentsList().then(() => {
+    document.getElementById('editDept').value = ticket.departmentId || '';
+  });
   document.getElementById('editDesc').value = ticket.description;
   document.getElementById('editRoom').value = ticket.room;
   bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
@@ -500,7 +516,12 @@ document.getElementById('addForm').addEventListener('submit', async e => {
     alert('Fill all fields');
     return;
   }
-  const body = { description, room, openedBy: currentUser.username };
+  const departmentId = document.getElementById('deptSelect').value;
+  if (!departmentId) {
+    alert('Fill all fields');
+    return;
+  }
+  const body = { description, room, departmentId, openedBy: currentUser.username };
   console.log('Sending ticket', body);
   try {
     const res = await fetch('/api/tickets', {
@@ -543,7 +564,8 @@ document.getElementById('editForm').addEventListener('submit', async e => {
   if (!editId) return;
   const body = {
     description: document.getElementById('editDesc').value.trim(),
-    room: document.getElementById('editRoom').value.trim()
+    room: document.getElementById('editRoom').value.trim(),
+    departmentId: document.getElementById('editDept').value
   };
   await fetch('/api/tickets/' + editId, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
   bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).hide();
@@ -584,6 +606,10 @@ document.body.addEventListener('click', e => {
             <div class="mb-3">
               <label for="editRoom" class="form-label" data-i18n="room">Room</label>
               <input type="text" id="editRoom" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label for="editDept" class="form-label" data-i18n="department">Department</label>
+              <select id="editDept" class="form-select" required></select>
             </div>
           </div>
           <div class="modal-footer">
