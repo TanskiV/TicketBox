@@ -409,6 +409,13 @@ async function start() {
         console.log(`Default admin created: ${username}/${password}`);
       }
 
+      const deptCount = await Department.countDocuments();
+      if (deptCount === 0) {
+        const name = process.env.DEFAULT_DEPARTMENT_NAME || 'General';
+        await Department.create({ name });
+        console.log(`Default department created: ${name}`);
+      }
+
       server = app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         resolve();
