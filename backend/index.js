@@ -119,6 +119,13 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+function requireAdminOrSuperuser(req, res, next) {
+  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superuser')) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  next();
+}
+
 const FRONTEND = path.join(__dirname, '../frontend');
 const PUBLIC_DIR = path.join(__dirname, '../public');
 const SRC_DIR = path.join(__dirname, '../src');
@@ -166,36 +173,53 @@ app.delete('/api/departments/:id', async (req, res) => {
 });
 
 
-// Users (admin only)
-app.get('/api/users', requireAdmin, async (req, res) => {
+// Users (admin or superuser)
+app.get('/api/users', requireAdminOrSuperuser, async (req, res) => {
   const list = await User.find();
   res.json(list);
 });
 
-app.post('/api/users', requireAdmin, async (req, res) => {
+app.post('/api/users', requireAdminOrSuperuser, async (req, res) => {
   const body = req.body || {};
   const user = await User.create({
     username: body.username || '',
     passwordHash: bcrypt.hashSync(body.password || '1234', 10),
     role: body.role || 'user',
-    departmentId: body.departmentId || null
+    departmentId: body.departmentId || null,
+    email: body.email || '',
+    name: body.name || ''
   });
   console.log('Saved to DB');
   res.json(user);
 });
 
-app.delete('/api/users/:id', requireAdmin, async (req, res) => {
+app.delete('/api/users/:id', requireAdminOrSuperuser, async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
 
-app.post('/api/users/:id/password', requireAdmin, async (req, res) => {
+app.post('/api/users/:id/password', requireAdminOrSuperuser, async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ error: 'not found' });
   user.passwordHash = bcrypt.hashSync(req.body.password || '1234', 10);
   await user.save();
   console.log('Saved to DB');
   res.json({ ok: true });
+});
+
+app.patch('/api/users/:id', requireAdminOrSuperuser, async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'not found' });
+  const { username, password, role, departmentId, email, name } = req.body || {};
+  if (username !== undefined) user.username = username;
+  if (email !== undefined) user.email = email;
+  if (name !== undefined) user.name = name;
+  if (role !== undefined) user.role = role;
+  if (departmentId !== undefined) user.departmentId = departmentId;
+  if (password) user.passwordHash = bcrypt.hashSync(password, 10);
+  await user.save();
+  console.log('Saved to DB');
+  res.json(user);
 });
 
 // Получить список заявок с фильтрацией
@@ -206,7 +230,7 @@ app.get('/api/tickets', async (req, res) => {
     query.isClosed = !open ? true : false;
   }
   if (req.query.room) query.room = req.query.room;
-  if (req.user && req.user.role !== 'admin') {
+  if (req.user && req.user.role !== 'admin' && req.user.role !== 'superuser') {
     query.departmentId = req.user.departmentId;
   } else if (req.query.departmentId) {
     query.departmentId = req.query.departmentId;
@@ -229,7 +253,7 @@ app.get('/api/tickets/closed', async (req, res) => {
     if (req.query.from) query.closedAt.$gte = new Date(req.query.from);
     if (req.query.to) query.closedAt.$lte = new Date(req.query.to);
   }
-  if (req.user && req.user.role !== 'admin') {
+  if (req.user && req.user.role !== 'admin' && req.user.role !== 'superuser') {
     query.departmentId = req.user.departmentId;
   } else if (req.query.departmentId) {
     query.departmentId = req.query.departmentId;
@@ -240,12 +264,12 @@ app.get('/api/tickets/closed', async (req, res) => {
 
 // Public ticket submission with optional photo
 app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
-  const { room = '', description = '' } = req.body || {};
-  if (!room) return res.status(400).json({ error: 'missing room' });
+  const { room = '', description = '', departmentId = null } = req.body || {};
+  if (!room || !departmentId) return res.status(400).json({ error: 'missing fields' });
   const ticket = await Ticket.create({
     description,
     room,
-    departmentId: null,
+    departmentId,
     openedBy: 'guest',
     openedAt: new Date()
   });
@@ -365,7 +389,9 @@ async function start() {
         await User.create({
           username,
           passwordHash: bcrypt.hashSync(password, 10),
-          role: 'admin'
+          role: 'admin',
+          name: 'Admin',
+          email: ''
         });
         console.log(`Default admin created: ${username}/${password}`);
       }
