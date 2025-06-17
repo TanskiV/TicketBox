@@ -465,11 +465,10 @@ async function closeTicket(id) {
   loadTickets();
 }
 
-function openEdit(ticket) {
+async function openEdit(ticket) {
   editId = ticket.id;
-  loadDepartmentsList().then(() => {
-    document.getElementById('editDept').value = ticket.departmentId || '';
-  });
+  await loadDepartmentsList();
+  document.getElementById('editDept').value = ticket.departmentId || '';
   document.getElementById('editDesc').value = ticket.description;
   document.getElementById('editRoom').value = ticket.room;
   bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
