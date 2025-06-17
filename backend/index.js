@@ -39,6 +39,11 @@ const upload = multer({ dest: UPLOAD_DIR });
 
 const sessions = {}; // token -> userId
 
+async function getNextTicketNumber() {
+  const last = await Ticket.findOne().sort('-ticketNumber').select('ticketNumber');
+  return last && last.ticketNumber ? last.ticketNumber + 1 : 100001;
+}
+
 // Connected Server-Sent Events clients
 const eventClients = [];
 function sendEvent(data) {
@@ -266,7 +271,9 @@ app.get('/api/tickets/closed', async (req, res) => {
 app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
   const { room = '', description = '', departmentId = null } = req.body || {};
   if (!room || !departmentId) return res.status(400).json({ error: 'missing fields' });
+  const ticketNumber = await getNextTicketNumber();
   const ticket = await Ticket.create({
+    ticketNumber,
     description,
     room,
     departmentId,
@@ -293,7 +300,9 @@ app.post('/api/tickets', async (req, res) => {
   if (!description || !room || !departmentId) {
     return res.status(400).json({ error: 'missing fields' });
   }
+  const ticketNumber = await getNextTicketNumber();
   const ticket = await Ticket.create({
+    ticketNumber,
     description,
     room,
     departmentId,
@@ -329,7 +338,10 @@ app.patch('/api/tickets/:id', async (req, res) => {
   const { description, room, departmentId } = req.body || {};
   if (description !== undefined) ticket.description = description;
   if (room !== undefined) ticket.room = room;
-  if (departmentId !== undefined) ticket.departmentId = departmentId;
+  if (departmentId !== undefined) {
+    if (!departmentId) return res.status(400).json({ error: 'missing fields' });
+    ticket.departmentId = departmentId;
+  }
   await ticket.save();
   console.log('Saved to DB');
   res.json(ticket);
