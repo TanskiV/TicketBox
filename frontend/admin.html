@@ -80,22 +80,6 @@
     </form>
   </div>
 
-  <h2 data-i18n="tickets">Tickets</h2>
-  <div class="panel form-section">
-    <div class="mb-3 d-flex flex-wrap gap-2">
-      <button id="downloadBackup" class="btn btn-secondary" data-i18n="downloadBackup">Download Backup</button>
-      <input type="file" id="backupFile" class="form-control" accept=".json" />
-      <button id="uploadBackup" class="btn btn-primary" data-i18n="uploadBackup">Upload Backup</button>
-    </div>
-  <div class="table-responsive">
-      <table id="ticketList" class="table table-bordered table-sm">
-        <thead>
-          <tr><th>ID</th><th data-i18n="description">Description</th><th data-i18n="room">Room</th><th data-i18n="actions">Actions</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
 
   <h2 data-i18n="manageNews">News</h2>
   <div class="panel form-section">
@@ -436,51 +420,7 @@ if (passwordForm) {
   });
 }
 
-let ticketsData = [];
-
 let newsData = [];
-
-async function loadTicketList() {
-  const res = await fetch('/api/tickets', { headers: authHeaders() });
-  ticketsData = await res.json();
-  renderTicketList();
-}
-
-function renderTicketList() {
-  const tbody = document.querySelector('#ticketList tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  ticketsData.forEach(t => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.id}</td><td>${t.description}</td><td>${t.room}</td>`;
-    const td = document.createElement('td');
-    const del = document.createElement('button');
-    del.className = 'btn btn-sm btn-danger';
-    del.textContent = tTranslate('delete');
-    del.onclick = async () => {
-      if (!confirm(tTranslate('deleteConfirm'))) return;
-      await fetch('/api/tickets/' + t.id, { method: 'DELETE', headers: authHeaders() });
-      loadTicketList();
-    };
-    td.appendChild(del);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-  });
-}
-
-document.getElementById('downloadBackup').addEventListener('click', () => {
-  window.location = '/api/tickets/backup';
-});
-
-document.getElementById('uploadBackup').addEventListener('click', async () => {
-  const input = document.getElementById('backupFile');
-  if (!input.files.length) return;
-  if (!confirm('Are you sure? This will overwrite all current data.')) return;
-  const text = await input.files[0].text();
-  await fetch('/api/tickets/restore', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: text });
-  input.value = '';
-  loadTicketList();
-});
 
 async function loadNewsList() {
   const res = await fetch('/api/news', { headers: authHeaders() });
@@ -538,7 +478,6 @@ document.getElementById('newsForm').addEventListener('submit', async e => {
 
 function tTranslate(key) { return t(key); }
 
-loadTicketList();
 loadNewsList();
 
 </script>

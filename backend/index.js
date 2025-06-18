@@ -161,6 +161,13 @@ function requireSuperuser(req, res, next) {
   next();
 }
 
+function requireAuth(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+  next();
+}
+
 const FRONTEND = path.join(__dirname, '../frontend');
 const PUBLIC_DIR = path.join(__dirname, '../public');
 const SRC_DIR = path.join(__dirname, '../src');
@@ -169,9 +176,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'index.html'));
 });
 
-app.get(['/faults', '/faults.html'], (req, res) => {
+app.get(['/faults', '/faults.html', '/tickets', '/tickets.html'], (req, res) => {
   if (!req.user) return res.redirect('/login.html');
-  res.sendFile(path.join(FRONTEND, 'faults.html'));
+  res.sendFile(path.join(FRONTEND, 'tickets.html'));
 });
 
 app.get('/admin/news', (req, res) => {
@@ -353,7 +360,7 @@ app.post('/api/tickets', async (req, res) => {
 });
 
 // Закрыть заявку
-app.post('/api/tickets/:id/close', async (req, res) => {
+app.post('/api/tickets/:id/close', requireAuth, async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) return res.status(404).json({ error: 'not found' });
   if (!ticket.isClosed) {
@@ -369,7 +376,7 @@ app.post('/api/tickets/:id/close', async (req, res) => {
 });
 
 // Переоткрыть заявку
-app.post('/api/tickets/:id/reopen', async (req, res) => {
+app.post('/api/tickets/:id/reopen', requireAdminOrSuperuser, async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) return res.status(404).json({ error: 'not found' });
   if (ticket.isClosed) {
@@ -384,7 +391,7 @@ app.post('/api/tickets/:id/reopen', async (req, res) => {
 });
 
 // Обновить заявку
-app.patch('/api/tickets/:id', async (req, res) => {
+app.patch('/api/tickets/:id', requireAdminOrSuperuser, async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) return res.status(404).json({ error: 'not found' });
   if (ticket.isClosed) return res.status(400).json({ error: 'closed' });
@@ -402,7 +409,7 @@ app.patch('/api/tickets/:id', async (req, res) => {
 });
 
 // Delete ticket (admin only)
-app.delete('/api/tickets/:id', requireAdmin, async (req, res) => {
+app.delete('/api/tickets/:id', requireAdminOrSuperuser, async (req, res) => {
   await Ticket.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
