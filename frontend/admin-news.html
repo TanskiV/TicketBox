@@ -26,16 +26,16 @@ function authHeaders(){
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': 'Bearer '+token } : {};
 }
-async function requireSuper(){
+async function requireAdminOrSuper(){
   const stored = localStorage.getItem('user');
   let u = stored?JSON.parse(stored):null;
   if(!u){
     const res = await fetch('/api/me');
     if(res.ok){u = await res.json(); localStorage.setItem('user', JSON.stringify(u));}
   }
-  if(!u || u.role !== 'superuser') { window.location.href = '/login.html'; return; }
+  if(!u || (u.role !== 'admin' && u.role !== 'superuser')) { window.location.href = '/login.html'; return; }
 }
-requireSuper();
+requireAdminOrSuper();
 
 document.getElementById('newsForm').addEventListener('submit', async e => {
   e.preventDefault();

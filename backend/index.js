@@ -139,6 +139,7 @@ app.get('/api/me', (req, res) => {
 
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
+    console.log(`[403] ${req.method} ${req.originalUrl} - role:${req.user ? req.user.role : 'none'} requires admin`);
     return res.status(403).json({ error: 'forbidden' });
   }
   next();
@@ -146,6 +147,7 @@ function requireAdmin(req, res, next) {
 
 function requireAdminOrSuperuser(req, res, next) {
   if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superuser')) {
+    console.log(`[403] ${req.method} ${req.originalUrl} - role:${req.user ? req.user.role : 'none'} requires admin/superuser`);
     return res.status(403).json({ error: 'forbidden' });
   }
   next();
@@ -153,6 +155,7 @@ function requireAdminOrSuperuser(req, res, next) {
 
 function requireSuperuser(req, res, next) {
   if (!req.user || req.user.role !== 'superuser') {
+    console.log(`[403] ${req.method} ${req.originalUrl} - role:${req.user ? req.user.role : 'none'} requires superuser`);
     return res.status(403).json({ error: 'forbidden' });
   }
   next();
@@ -440,7 +443,7 @@ app.get('/api/news', async (req, res) => {
   res.json(list);
 });
 
-app.post('/api/news', requireSuperuser, newsUpload.single('image'), async (req, res) => {
+app.post('/api/news', requireAdminOrSuperuser, newsUpload.single('image'), async (req, res) => {
   const { title = '', content = '' } = req.body || {};
   if (!title || !content) return res.status(400).json({ error: 'missing fields' });
   const news = await News.create({
@@ -451,7 +454,7 @@ app.post('/api/news', requireSuperuser, newsUpload.single('image'), async (req, 
   res.json(news);
 });
 
-app.delete('/api/news/:id', requireSuperuser, async (req, res) => {
+app.delete('/api/news/:id', requireAdminOrSuperuser, async (req, res) => {
   await News.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
