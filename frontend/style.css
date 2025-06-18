@@ -374,9 +374,15 @@ tbody tr.divider td {
 }
 
 .logo {
+  max-width: 150px;
+  height: auto;
   display: block;
   margin: 0 auto;
-  max-height: 80px;
+}
+
+.logo-container {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .header-title {
