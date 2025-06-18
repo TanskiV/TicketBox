@@ -374,6 +374,7 @@ tbody tr.divider td {
 }
 
 .logo {
+  width: 100%;
   max-width: 150px;
   height: auto;
   display: block;
