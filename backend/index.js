@@ -37,7 +37,8 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 const app = express();
 const upload = multer({ dest: UPLOAD_DIR });
 
-const sessions = {}; // token -> userId
+const DAY_MS = 24 * 60 * 60 * 1000;
+const sessions = {}; // token -> { userId, expires }
 
 async function getNextTicketNumber() {
   const last = await Ticket.findOne().sort('-ticketNumber').select('ticketNumber');
@@ -64,8 +65,13 @@ async function authMiddleware(req, res, next) {
   let token = auth && auth.startsWith('Bearer ') ? auth.slice(7) : null;
   if (!token) token = getTokenFromCookie(req);
   if (token && sessions[token]) {
-    const user = await User.findById(sessions[token]);
-    if (user) req.user = user;
+    const session = sessions[token];
+    if (session.expires > Date.now()) {
+      const user = await User.findById(session.userId);
+      if (user) req.user = user;
+    } else {
+      delete sessions[token];
+    }
   }
   next();
 }
@@ -94,8 +100,8 @@ app.post('/api/login', async (req, res) => {
     return res.status(401).json({ error: 'invalid' });
   }
   const token = crypto.randomBytes(16).toString('hex');
-  sessions[token] = user._id;
-  res.cookie('token', token, { path: '/' });
+  sessions[token] = { userId: user._id, expires: Date.now() + DAY_MS };
+  res.cookie('token', token, { path: '/', maxAge: DAY_MS });
   res.json({
     token,
     user: { id: user._id, username: user.username, role: user.role, departmentId: user.departmentId }

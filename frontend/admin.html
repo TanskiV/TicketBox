@@ -116,10 +116,17 @@ async function requireLogin(){
     }
   }
   if(!u){
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     window.location.href = '/login.html';
     return;
   }
-  if(u.role !== 'admin'){ window.location.href = '/index.html'; return; }
+  if(u.role !== 'admin'){
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    window.location.href = '/index.html';
+    return;
+  }
   currentUser = u;
 }
 requireLogin();
