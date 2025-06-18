@@ -1,4 +1,4 @@
-const { Ticket, User, Department } = require('../backend/models');
+const { Ticket, User, Department, News } = require('../backend/models');
 
 test('Ticket isClosed defaults to false', () => {
   const def = Ticket.schema.path('isClosed').defaultValue;
@@ -19,4 +19,13 @@ test('Department name is required', () => {
 test('Ticket has numeric ticketNumber', () => {
   const numPath = Ticket.schema.path('ticketNumber');
   expect(numPath.instance).toBe('Number');
+});
+
+test('News fields and defaults', () => {
+  const titleReq = News.schema.path('title').isRequired;
+  const contentReq = News.schema.path('content').isRequired;
+  const def = News.schema.path('createdAt').defaultValue;
+  expect(titleReq).toBe(true);
+  expect(contentReq).toBe(true);
+  expect(def).toBeDefined();
 });

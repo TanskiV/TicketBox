@@ -36,10 +36,18 @@ const PhotoSchema = new mongoose.Schema({
 });
 const Photo = mongoose.model('Photo', PhotoSchema);
 
+const NewsSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  imageUrl: String,
+  createdAt: { type: Date, default: Date.now }
+});
+const News = mongoose.model('News', NewsSchema);
+
 // Include virtual `id` field when converting documents to JSON or plain objects
 [DepartmentSchema, UserSchema, TicketSchema, PhotoSchema].forEach(schema => {
   schema.set('toJSON', { virtuals: true });
   schema.set('toObject', { virtuals: true });
 });
 
-module.exports = { mongoose, Ticket, User, Department, Photo };
+module.exports = { mongoose, Ticket, User, Department, Photo, News };

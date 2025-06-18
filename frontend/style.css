@@ -393,3 +393,16 @@ tbody tr.divider td {
 .header-title {
   display: none;
 }
+
+.news-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1em;
+  margin-bottom: 1em;
+  background-color: #fafafa;
+}
+.news-card img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 0.5em;
+}
