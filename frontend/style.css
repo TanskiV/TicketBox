@@ -377,8 +377,16 @@ tbody tr.divider td {
   width: 100%;
   max-width: 150px;
   height: auto;
+  max-height: 120px;
   display: block;
   margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .logo {
+    max-height: 80px;
+    margin-bottom: 10px;
+  }
 }
 
 .logo-container {
