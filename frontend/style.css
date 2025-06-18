@@ -373,18 +373,15 @@ tbody tr.divider td {
   transform: rotate(90deg);
 }
 
-.logo img {
+.logo-img {
   max-width: 100%;
   height: auto;
   max-height: 100px;
-  display: block;
-  margin: 0 auto;
 }
 
 @media (max-width: 768px) {
-  .logo img {
+  .logo-img {
     max-height: 70px;
-    margin-bottom: 10px;
   }
 }
 
