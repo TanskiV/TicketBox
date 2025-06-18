@@ -99,13 +99,14 @@
 
   <h2 data-i18n="manageNews">News</h2>
   <div class="panel form-section">
-    <form id="newsForm" class="mb-3">
+    <form id="newsForm" class="mb-3" enctype="multipart/form-data">
       <div class="mb-2">
         <input type="text" id="newsTitle" class="form-control" data-i18n-placeholder="newsTitle" required />
       </div>
       <div class="mb-2">
         <textarea id="newsContent" class="form-control" rows="3" data-i18n-placeholder="newsContent" required></textarea>
       </div>
+      <input type="file" id="newsImage" name="image" accept="image/*" class="form-control mb-3">
       <button type="submit" class="btn btn-primary" data-i18n="publish">Publish</button>
     </form>
     <ul id="newsList" class="list-group"></ul>
@@ -498,6 +499,12 @@ function renderNewsList() {
     const div = document.createElement('div');
     div.className = 'me-2';
     div.innerHTML = `<strong>${n.title}</strong><div>${n.content}</div>`;
+    if(n.imageUrl){
+      const img = document.createElement('img');
+      img.src = n.imageUrl;
+      img.className = 'img-fluid rounded mb-2';
+      div.appendChild(img);
+    }
     li.appendChild(div);
     const del = document.createElement('button');
     del.className = 'btn btn-sm btn-danger';
@@ -517,6 +524,8 @@ document.getElementById('newsForm').addEventListener('submit', async e => {
   const fd = new FormData();
   fd.append('title', document.getElementById('newsTitle').value.trim());
   fd.append('content', document.getElementById('newsContent').value.trim());
+  const file = document.getElementById('newsImage').files[0];
+  if(file) fd.append('image', file);
   const res = await fetch('/api/news', { method: 'POST', headers: authHeaders(), body: fd });
   if (res.ok) {
     e.target.reset();

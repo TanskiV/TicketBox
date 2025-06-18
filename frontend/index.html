@@ -28,12 +28,13 @@ async function loadNews(){
     div.className = 'news-card';
     const date = new Date(n.createdAt).toLocaleDateString();
     div.innerHTML = `<h3>${n.title}</h3><small>${date}</small><p>${n.content}</p>`;
-    if(n.imageUrl){
-      const img = document.createElement('img');
-      img.src = n.imageUrl;
-      img.className = 'img-fluid';
-      div.appendChild(img);
-    }
+      if(n.imageUrl){
+        const img = document.createElement('img');
+        img.src = n.imageUrl;
+        img.alt = 'News Image';
+        img.className = 'img-fluid rounded mb-3';
+        div.appendChild(img);
+      }
     container.appendChild(div);
   });
 }
