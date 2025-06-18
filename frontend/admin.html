@@ -18,7 +18,6 @@
 
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
   <div class="panel form-section">
-    <h3>Add New Department</h3>
     <form id="deptForm" class="row g-2" autocomplete="off">
       <div class="col">
         <input type="text" id="newDept" class="form-control" autocomplete="off" required />
@@ -32,7 +31,6 @@
 
   <h2 data-i18n="manageUsers">Manage Users</h2>
   <div class="panel form-section">
-    <h3>Add User (Login Access)</h3>
     <form id="userForm" class="row g-2 align-items-end" autocomplete="off">
       <div class="col-md-3">
         <input type="text" id="newUsername" data-i18n-placeholder="login" class="form-control" autocomplete="off" required />
@@ -57,7 +55,7 @@
     <div class="table-responsive">
       <table id="userList" class="table table-bordered table-sm">
         <thead>
-          <tr><th>Login</th><th>Role</th><th>Department</th><th></th></tr>
+          <tr><th data-i18n="login">Login</th><th data-i18n="role">Role</th><th data-i18n="department">Department</th><th></th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -66,13 +64,13 @@
 
   <h2 data-i18n="changePassword">Change Password</h2>
   <div class="panel form-section">
-    <h3>Change Password</h3>
+    <h3 data-i18n="changePassword">Change Password</h3>
     <form id="passwordForm" class="row g-2" autocomplete="off">
       <div class="col-md-4">
         <select id="passwordUser" class="form-select"></select>
       </div>
       <div class="col-md-4">
-        <input type="password" id="adminPassword" class="form-control" placeholder="New Password" autocomplete="new-password" required />
+        <input type="password" id="adminPassword" class="form-control" data-i18n-placeholder="newPassword" autocomplete="new-password" required />
       </div>
       <div class="col-md-4">
         <button type="submit" class="btn btn-primary w-100" data-i18n="change">Change</button>
@@ -152,6 +150,8 @@ const translations = {
     manageUsers: 'Manage Users',
     login: 'Login',
     password: 'Password',
+    newPassword: 'New Password',
+    role: 'Role',
     changePassword: 'Change Password',
     logout: 'Logout',
     change: 'Change',
@@ -197,6 +197,8 @@ const translations = {
       manageUsers: '\u05E0\u05D9\u05D4\u05D5\u05DC \u05DE\u05E9\u05EA\u05DE\u05E9\u05D9\u05DD',
       login: '\u05E9\u05DD \u05DE\u05E9\u05EA\u05DE\u05E9',
       password: '\u05E1\u05D9\u05E1\u05DE\u05D4',
+      newPassword: '\u05E1\u05D9\u05E1\u05DE\u05D4 \u05D7\u05D3\u05E9\u05D4',
+      role: '\u05EA\u05E4\u05E7\u05D9\u05D3',
       changePassword: '\u05E9\u05D9\u05E0\u05D5\u05D9 \u05E1\u05D9\u05E1\u05DE\u05D4',
       logout: '\u05D9\u05E6\u05D9\u05D0\u05D4',
       change: '\u05E9\u05E0\u05D4',
@@ -232,6 +234,8 @@ const translations = {
     manageUsers: '\u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F\u043C\u0438',
     login: '\u041B\u043E\u0433\u0438\u043D',
     password: '\u041F\u0430\u0440\u043E\u043B\u044C',
+    newPassword: '\u041D\u043E\u0432\u044B\u0439 \u043F\u0430\u0440\u043E\u043B\u044C',
+    role: '\u0420\u043E\u043B\u044C',
     changePassword: '\u0421\u043C\u0435\u043D\u0438\u0442\u044C \u043F\u0430\u0440\u043E\u043B\u044C',
     logout: '\u0412\u044B\u0445\u043E\u0434',
     change: '\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C',
