@@ -33,9 +33,23 @@ const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
+const NEWS_UPLOAD_DIR = path.join(UPLOAD_DIR, 'news');
+if (!fs.existsSync(NEWS_UPLOAD_DIR)) {
+  fs.mkdirSync(NEWS_UPLOAD_DIR, { recursive: true });
+}
 
 const app = express();
 const upload = multer({ dest: UPLOAD_DIR });
+const newsUpload = multer({
+  storage: multer.diskStorage({
+    destination: NEWS_UPLOAD_DIR,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const name = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
+      cb(null, name);
+    }
+  })
+});
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const sessions = {}; // token -> { userId, expires }
@@ -426,13 +440,13 @@ app.get('/api/news', async (req, res) => {
   res.json(list);
 });
 
-app.post('/api/news', requireSuperuser, upload.single('image'), async (req, res) => {
+app.post('/api/news', requireSuperuser, newsUpload.single('image'), async (req, res) => {
   const { title = '', content = '' } = req.body || {};
   if (!title || !content) return res.status(400).json({ error: 'missing fields' });
   const news = await News.create({
     title,
     content,
-    imageUrl: req.file ? '/uploads/' + req.file.filename : ''
+    imageUrl: req.file ? '/uploads/news/' + req.file.filename : ''
   });
   res.json(news);
 });
