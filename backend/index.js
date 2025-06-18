@@ -162,6 +162,11 @@ app.get('/admin/news', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'admin-news.html'));
 });
 
+app.get('/admin', (req, res) => {
+  if (!req.user || req.user.role !== 'admin') return res.redirect('/login.html');
+  res.sendFile(path.join(FRONTEND, 'admin.html'));
+});
+
 app.get('/admin.html', (req, res) => {
   if (!req.user || req.user.role !== 'admin') return res.redirect('/login.html');
   res.sendFile(path.join(FRONTEND, 'admin.html'));
@@ -430,6 +435,11 @@ app.post('/api/news', requireSuperuser, upload.single('image'), async (req, res)
     imageUrl: req.file ? '/uploads/' + req.file.filename : ''
   });
   res.json(news);
+});
+
+app.delete('/api/news/:id', requireSuperuser, async (req, res) => {
+  await News.findByIdAndDelete(req.params.id);
+  res.json({ ok: true });
 });
 
 // fallback to index.html for any other route

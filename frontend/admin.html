@@ -87,7 +87,7 @@
       <input type="file" id="backupFile" class="form-control" accept=".json" />
       <button id="uploadBackup" class="btn btn-primary" data-i18n="uploadBackup">Upload Backup</button>
     </div>
-    <div class="table-responsive">
+  <div class="table-responsive">
       <table id="ticketList" class="table table-bordered table-sm">
         <thead>
           <tr><th>ID</th><th data-i18n="description">Description</th><th data-i18n="room">Room</th><th data-i18n="actions">Actions</th></tr>
@@ -95,6 +95,20 @@
         <tbody></tbody>
       </table>
     </div>
+  </div>
+
+  <h2 data-i18n="manageNews">News</h2>
+  <div class="panel form-section">
+    <form id="newsForm" class="mb-3">
+      <div class="mb-2">
+        <input type="text" id="newsTitle" class="form-control" data-i18n-placeholder="newsTitle" required />
+      </div>
+      <div class="mb-2">
+        <textarea id="newsContent" class="form-control" rows="3" data-i18n-placeholder="newsContent" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" data-i18n="publish">Publish</button>
+    </form>
+    <ul id="newsList" class="list-group"></ul>
   </div>
 
 <script>
@@ -158,6 +172,11 @@ const translations = {
     change: 'Change',
     downloadBackup: 'Download Backup',
     uploadBackup: 'Upload Backup',
+    manageNews: 'News',
+    newsTitle: 'Title',
+    newsContent: 'Content',
+    publish: 'Publish',
+    deleteNewsConfirm: 'Delete this news?',
     deleteConfirm: 'Delete this ticket?',
     delete: 'Delete',
     openStatus: 'Open',
@@ -198,6 +217,11 @@ const translations = {
       change: '\u05E9\u05E0\u05D4',
       downloadBackup: '\u05D4\u05D5\u05E8\u05D3 \u05D2\u05D9\u05D1\u05D5\u05D9',
       uploadBackup: '\u05D4\u05E2\u05DC\u05D4 \u05D2\u05D9\u05D1\u05D5\u05D9',
+      manageNews: '\u05D7\u05D3\u05E9\u05D5\u05EA',
+      newsTitle: '\u05DB\u05D5\u05EA\u05E8\u05EA',
+      newsContent: '\u05EA\u05D5\u05DB\u05DF',
+      publish: '\u05E4\u05E8\u05E1\u05DD',
+      deleteNewsConfirm: '\u05DC\u05DE\u05D7\u05D5\u05E7 \u05D0\u05EA \u05D4\u05D9\u05D3\u05E2\u05D4?',
       deleteConfirm: '\u05DC\u05DE\u05D7\u05D5\u05E7 \u05D0\u05EA \u05D4\u05EA\u05E7\u05DC\u05D4?',
       delete: '\u05DE\u05D7\u05D9\u05E7\u05D4'
     },
@@ -228,6 +252,11 @@ const translations = {
     change: '\u0418\u0437\u043C\u0435\u043D\u0438\u0442\u044C',
     downloadBackup: '\u0421\u043A\u0430\u0447\u0430\u0442\u044C \u0440\u0435\u0437\u0435\u0440\u0432',
     uploadBackup: '\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0440\u0435\u0437\u0435\u0440\u0432',
+    manageNews: '\u041D\u043E\u0432\u043E\u0441\u0442\u0438',
+    newsTitle: '\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A',
+    newsContent: '\u0422\u0435\u043A\u0441\u0442',
+    publish: '\u041E\u043F\u0443\u0431\u043B\u0438\u043A\u043E\u0432\u0430\u0442\u044C',
+    deleteNewsConfirm: '\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u043D\u043E\u0432\u043E\u0441\u0442\u044C?',
     deleteConfirm: '\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u044D\u0442\u0443 \u0437\u0430\u044F\u0432\u043A\u0443?',
     delete: '\u0423\u0434\u0430\u043B\u0438\u0442\u044C',
     openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
@@ -408,6 +437,8 @@ if (passwordForm) {
 
 let ticketsData = [];
 
+let newsData = [];
+
 async function loadTicketList() {
   const res = await fetch('/api/tickets', { headers: authHeaders() });
   ticketsData = await res.json();
@@ -450,9 +481,56 @@ document.getElementById('uploadBackup').addEventListener('click', async () => {
   loadTicketList();
 });
 
+async function loadNewsList() {
+  const res = await fetch('/api/news', { headers: authHeaders() });
+  if (!res.ok) return;
+  newsData = await res.json();
+  renderNewsList();
+}
+
+function renderNewsList() {
+  const list = document.getElementById('newsList');
+  if (!list) return;
+  list.innerHTML = '';
+  newsData.forEach(n => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-start';
+    const div = document.createElement('div');
+    div.className = 'me-2';
+    div.innerHTML = `<strong>${n.title}</strong><div>${n.content}</div>`;
+    li.appendChild(div);
+    const del = document.createElement('button');
+    del.className = 'btn btn-sm btn-danger';
+    del.textContent = tTranslate('delete');
+    del.onclick = async () => {
+      if (!confirm(tTranslate('deleteNewsConfirm'))) return;
+      await fetch('/api/news/' + (n.id || n._id), { method: 'DELETE', headers: authHeaders() });
+      loadNewsList();
+    };
+    li.appendChild(del);
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('newsForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd = new FormData();
+  fd.append('title', document.getElementById('newsTitle').value.trim());
+  fd.append('content', document.getElementById('newsContent').value.trim());
+  const res = await fetch('/api/news', { method: 'POST', headers: authHeaders(), body: fd });
+  if (res.ok) {
+    e.target.reset();
+    loadNewsList();
+  } else {
+    const err = await res.json().catch(() => ({ error: 'Error' }));
+    alert(err.error);
+  }
+});
+
 function tTranslate(key) { return t(key); }
 
 loadTicketList();
+loadNewsList();
 
 </script>
 </div>
