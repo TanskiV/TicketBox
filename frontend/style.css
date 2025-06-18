@@ -183,6 +183,11 @@ form button:hover {
   background-color: #004080;
 }
 
+.submit-button {
+  width: 100%;
+  text-align: center;
+}
+
 @media (max-width: 600px) {
   form {
     flex-direction: column;
