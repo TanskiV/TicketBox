@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const mongoose = require('mongoose');
-const { Ticket, User, Department, Photo } = require('./models');
+const { Ticket, User, Department, Photo, News } = require('./models');
 
 const PORT = process.env.PORT || 3000;
 
@@ -137,20 +137,29 @@ function requireAdminOrSuperuser(req, res, next) {
   next();
 }
 
+function requireSuperuser(req, res, next) {
+  if (!req.user || req.user.role !== 'superuser') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  next();
+}
+
 const FRONTEND = path.join(__dirname, '../frontend');
 const PUBLIC_DIR = path.join(__dirname, '../public');
 const SRC_DIR = path.join(__dirname, '../src');
 
 app.get('/', (req, res) => {
-  if (req.user) {
-    return res.redirect(req.user.role === 'admin' ? '/admin.html' : '/index.html');
-  }
-  res.redirect('/login.html');
+  res.sendFile(path.join(FRONTEND, 'index.html'));
 });
 
-app.get('/index.html', (req, res) => {
+app.get(['/faults', '/faults.html'], (req, res) => {
   if (!req.user) return res.redirect('/login.html');
-  res.sendFile(path.join(FRONTEND, 'index.html'));
+  res.sendFile(path.join(FRONTEND, 'faults.html'));
+});
+
+app.get('/admin/news', (req, res) => {
+  if (!req.user || req.user.role !== 'superuser') return res.redirect('/login.html');
+  res.sendFile(path.join(FRONTEND, 'admin-news.html'));
 });
 
 app.get('/admin.html', (req, res) => {
@@ -161,6 +170,7 @@ app.get('/admin.html', (req, res) => {
 app.use(express.static(PUBLIC_DIR));
 app.use(express.static(SRC_DIR));
 app.use(express.static(FRONTEND));
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Сервер работает' });
@@ -403,6 +413,23 @@ app.get('/api/photos/:ticketId', async (req, res) => {
   if (!photo) return res.status(404).end();
   res.contentType(photo.contentType);
   res.send(photo.data);
+});
+
+// News endpoints
+app.get('/api/news', async (req, res) => {
+  const list = await News.find().sort('-createdAt');
+  res.json(list);
+});
+
+app.post('/api/news', requireSuperuser, upload.single('image'), async (req, res) => {
+  const { title = '', content = '' } = req.body || {};
+  if (!title || !content) return res.status(400).json({ error: 'missing fields' });
+  const news = await News.create({
+    title,
+    content,
+    imageUrl: req.file ? '/uploads/' + req.file.filename : ''
+  });
+  res.json(news);
 });
 
 // fallback to index.html for any other route
