@@ -31,6 +31,14 @@
     if(window.setLang) window.setLang(lang);
   }
 
+  window.addEventListener('storage', e => {
+    if(e.key === 'lang') {
+      lang = e.newValue || 'en';
+      apply();
+      if(window.setLang) window.setLang(lang);
+    }
+  });
+
   async function setupLogin(){
     const userStr = localStorage.getItem('user');
     const link = document.getElementById('loginLogout');
