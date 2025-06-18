@@ -110,6 +110,8 @@ async function requireLogin(){
     localStorage.setItem('user', JSON.stringify(currentUser));
     return;
   }
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
   window.location.href = '/login.html';
 }
 requireLogin();

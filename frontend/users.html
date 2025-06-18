@@ -46,6 +46,8 @@ async function requireLogin(){
   if(stored){ const u = JSON.parse(stored); if(u.role==='admin'||u.role==='superuser'){ currentUser=u; return; } }
   const res = await fetch('/api/me');
   if(res.ok){ const u = await res.json(); localStorage.setItem('user', JSON.stringify(u)); if(u.role==='admin'||u.role==='superuser'){ currentUser=u; return; }}
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
   window.location.href = '/login.html';
 }
 requireLogin();
