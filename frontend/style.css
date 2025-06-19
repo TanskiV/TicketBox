@@ -384,6 +384,13 @@ tbody tr.divider td {
   max-height: 100px;
 }
 
+@media (min-width: 768px) {
+  .logo {
+    max-width: 25%;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 768px) {
   .logo-img {
     max-height: 70px;
@@ -426,7 +433,7 @@ tbody tr.divider td {
   overflow: hidden;
 }
 .card-img-top {
-  max-height: 250px;
+  max-height: 40vw;
   object-fit: cover;
 }
 

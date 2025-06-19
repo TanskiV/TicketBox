@@ -52,7 +52,7 @@
   </div>
   </div>
 
-  <div class="mt-4">
+  <div id="closedSection" class="mt-4">
     <h3 data-i18n="closedTodayHeading">תקלות שנסגרו היום</h3>
     <div class="table-responsive">
       <table id="closedTable" class="table table-bordered table-sm">
@@ -491,6 +491,12 @@ async function loadClosedTickets() {
   const data = await res.json();
   const tbody = document.querySelector('#closedTable tbody');
   tbody.innerHTML = '';
+  const section = document.getElementById('closedSection');
+  if (data.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
   data.forEach((ticket, idx) => {
     const tr = document.createElement('tr');
     const openedBy = ticket.openedBy || 'לא ידוע';
