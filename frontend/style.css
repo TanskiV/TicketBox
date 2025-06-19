@@ -386,7 +386,8 @@ tbody tr.divider td {
 
 @media (min-width: 768px) {
   .logo {
-    max-width: 25%;
+    width: 20vw;
+    max-width: 20vw;
     margin: 0 auto;
   }
 }
@@ -443,6 +444,9 @@ tbody tr.divider td {
 }
 
 html[dir="rtl"] .form-select {
-  direction: ltr;
+  direction: rtl;
   text-align: right;
+  padding-right: 0.75rem;
+  padding-left: 2.25rem;
+  background-position: left 0.75rem center;
 }
