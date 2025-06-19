@@ -281,10 +281,9 @@ app.patch('/api/users/:id', requireAdminOrSuperuser, async (req, res) => {
 // Получить список заявок с фильтрацией
 app.get('/api/tickets', async (req, res) => {
   const query = {};
-  if (req.query.status) {
-    const open = req.query.status === 'open';
+  if (req.query.status === 'open') {
     // include documents missing `isClosed` when fetching open tickets
-    query.isClosed = open ? { $ne: true } : true;
+    query.isClosed = { $ne: true };
   }
   if (req.query.room) query.room = req.query.room;
   if (req.user && req.user.role !== 'admin' && req.user.role !== 'superuser') {
