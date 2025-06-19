@@ -57,20 +57,7 @@
   </div>
 
   <div class="mt-4">
-    <div class="row g-2 mb-2">
-      <div class="col-auto">
-        <input type="date" id="fromDate" class="form-control" />
-      </div>
-      <div class="col-auto">
-        <input type="date" id="toDate" class="form-control" />
-      </div>
-      <div class="col-auto">
-        <input type="text" id="closedRoom" class="form-control" data-i18n-placeholder="room" />
-      </div>
-      <div class="col-auto">
-        <button id="showClosed" class="btn btn-secondary" data-i18n="showClosed">Show closed tickets</button>
-      </div>
-    </div>
+    <h3 data-i18n="closedTodayHeading">תקלות שנסגרו היום</h3>
     <div class="table-responsive">
       <table id="closedTable" class="table table-bordered table-sm">
         <thead>
@@ -154,7 +141,8 @@ const translations = {
       deleteConfirm: 'Delete this ticket?',
       delete: 'Delete',
       departmentRequired: 'Department required',
-      ticketAdded: 'Ticket added successfully!'
+      ticketAdded: 'Ticket added successfully!',
+      closedTodayHeading: 'Tickets closed today'
     },
     he: {
     title: 'Hotel Sharon - TicketBox',
@@ -194,7 +182,8 @@ const translations = {
       deleteConfirm: '\u05DC\u05DE\u05D7\u05D5\u05E7 \u05D0\u05EA \u05D4\u05EA\u05E7\u05DC\u05D4?',
       delete: '\u05DE\u05D7\u05D9\u05E7\u05D4',
       departmentRequired: '\u05DE\u05D7\u05DC\u05E7\u05D4 \u05E0\u05D3\u05E8\u05E9\u05EA',
-      ticketAdded: '\u05D4\u05EA\u05E7\u05DC\u05D4 \u05E0\u05D5\u05E1\u05E4\u05D4 \u05D1\u05D4\u05E6\u05DC\u05D7\u05D4!'
+      ticketAdded: '\u05D4\u05EA\u05E7\u05DC\u05D4 \u05E0\u05D5\u05E1\u05E4\u05D4 \u05D1\u05D4\u05E6\u05DC\u05D7\u05D4!',
+      closedTodayHeading: '\u05EA\u05E7\u05DC\u05D5\u05EA \u05E9\u05E0\u05E1\u05D2\u05E8\u05D5 \u05D4\u05D9\u05D5\u05DD'
     },
     ru: {
     title: 'Hotel Sharon - TicketBox',
@@ -227,9 +216,10 @@ const translations = {
     editTicket: '\u0420\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0437\u0430\u044F\u0432\u043A\u0443',
     deleteConfirm: "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u044d\u0442\u0443 \u0437\u0430\u044F\u0432\u043A\u0443?",
     delete: "\u0423\u0434\u0430\u043B\u0438\u0442\u044C",
-    departmentRequired: '\u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B',
-    ticketAdded: '\u0417\u0430\u044F\u0432\u043A\u0430 \u0443\u0441\u043F\u0435\u0448\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0430!',
-    openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
+      departmentRequired: '\u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B',
+      ticketAdded: '\u0417\u0430\u044F\u0432\u043A\u0430 \u0443\u0441\u043F\u0435\u0448\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0430!',
+      closedTodayHeading: '\u0417\u0430\u043A\u0440\u044B\u0442\u044B\u0435 \u0441\u0435\u0433\u043E\u0434\u043D\u044F'
+      openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
       closedStatus: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
       close: '\u0417\u0430\u043A\u0440\u044B\u0442\u044C',
       reopen: '\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0437\u0430\u043D\u043E\u0432\u043E',
@@ -529,12 +519,9 @@ async function openEdit(ticket) {
 
 async function loadClosedTickets() {
   const params = new URLSearchParams();
-  const room = document.getElementById('closedRoom').value.trim();
-  if (room) params.set('room', room);
-  const from = document.getElementById('fromDate').value;
-  const to = document.getElementById('toDate').value;
-  if (from) params.set('from', from);
-  if (to) params.set('to', to);
+  const today = new Date().toISOString().slice(0,10);
+  params.set('from', today);
+  params.set('to', today);
   const res = await fetch('/api/tickets/closed?' + params.toString(), { headers: authHeaders() });
   const data = await res.json();
   const tbody = document.querySelector('#closedTable tbody');
@@ -600,6 +587,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
 
 setLang(getLang());
 setupSorting();
+loadClosedTickets();
 
 const deptForm = document.getElementById('deptForm');
 if (deptForm) {
@@ -611,7 +599,6 @@ if (deptForm) {
   });
 }
 
-document.getElementById('showClosed').addEventListener('click', loadClosedTickets);
 document.getElementById('editForm').addEventListener('submit', async e => {
   e.preventDefault();
   if (!editId) return;
