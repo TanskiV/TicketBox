@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Search Tickets</title>
+  <title data-i18n="title">Search Tickets</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="logo.png" />
@@ -14,26 +14,77 @@
 <body>
 <div id="header"></div>
 <div class="container mt-3">
-  <h2>Search Tickets</h2>
-  <form id="searchForm" class="row g-2 mb-3">
-    <div class="col-md-2"><input type="date" id="openFrom" class="form-control" placeholder="Open from"></div>
-    <div class="col-md-2"><input type="date" id="openTo" class="form-control" placeholder="Open to"></div>
-    <div class="col-md-2"><input type="date" id="closeFrom" class="form-control" placeholder="Close from"></div>
-    <div class="col-md-2"><input type="date" id="closeTo" class="form-control" placeholder="Close to"></div>
-    <div class="col-md-2"><input type="text" id="room" class="form-control" placeholder="Room"></div>
-    <div class="col-md-2">
-      <select id="status" class="form-select">
-        <option value="">All</option>
-        <option value="open">Open</option>
-        <option value="closed">Closed</option>
-        <option value="inprogress">In Process</option>
-      </select>
+  <h2 data-i18n="title">Search Tickets</h2>
+  <form id="searchForm" autocomplete="off">
+    <div class="form-section mb-3">
+      <h5 data-i18n="dateSection">Date</h5>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label for="openFrom" class="form-label" data-i18n="openFrom">Opened from</label>
+          <input type="date" id="openFrom" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label for="openTo" class="form-label" data-i18n="openTo">Opened to</label>
+          <input type="date" id="openTo" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label for="closeFrom" class="form-label" data-i18n="closeFrom">Closed from</label>
+          <input type="date" id="closeFrom" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label for="closeTo" class="form-label" data-i18n="closeTo">Closed to</label>
+          <input type="date" id="closeTo" class="form-control" />
+        </div>
+      </div>
     </div>
-    <div class="col-md-2"><input type="text" id="openedBy" class="form-control" placeholder="Opened by"></div>
-    <div class="col-md-2"><input type="text" id="closedBy" class="form-control" placeholder="Closed by"></div>
-    <div class="col-md-2"><select id="department" class="form-select"></select></div>
-    <div class="col-md-2"><input type="text" id="keyword" class="form-control" placeholder="Keyword"></div>
-    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Search</button></div>
+    <div class="form-section mb-3">
+      <h5 data-i18n="roomDeptSection">Room and Department</h5>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label for="room" class="form-label" data-i18n="room">Room</label>
+          <input type="text" id="room" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label for="department" class="form-label" data-i18n="department">Department</label>
+          <select id="department" class="form-select"></select>
+        </div>
+        <div class="col-md-3">
+          <label for="status" class="form-label" data-i18n="status">Status</label>
+          <select id="status" class="form-select">
+            <option value="" data-i18n-option="all">All</option>
+            <option value="open" data-i18n-option="open">Open</option>
+            <option value="closed" data-i18n-option="closed">Closed</option>
+            <option value="inprogress" data-i18n-option="inprogress">In Process</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-section mb-3">
+      <h5 data-i18n="usersSection">Users</h5>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label for="openedBy" class="form-label" data-i18n="openedBy">Opened by</label>
+          <input type="text" id="openedBy" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label for="closedBy" class="form-label" data-i18n="closedBy">Closed by</label>
+          <input type="text" id="closedBy" class="form-control" />
+        </div>
+      </div>
+    </div>
+    <div class="form-section mb-3">
+      <h5 data-i18n="keywordSection">Keyword Search</h5>
+      <div class="row g-2">
+        <div class="col-md-4">
+          <label for="keyword" class="form-label" data-i18n="keyword">Keyword</label>
+          <input type="text" id="keyword" class="form-control" />
+        </div>
+      </div>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col-md-2"><button type="submit" class="btn btn-primary w-100" data-i18n="search">Search Tickets</button></div>
+      <div class="col-md-2"><button type="button" id="clearBtn" class="btn btn-secondary w-100" data-i18n="clear">Clear</button></div>
+    </div>
   </form>
   <div class="table-responsive">
     <table id="results" class="table table-bordered table-sm">
@@ -57,6 +108,101 @@
 <script>
 let currentUser = null;
 let departments = [];
+const translations = {
+  en: {
+    title: 'Search Tickets',
+    dateSection: 'Date',
+    openFrom: 'Opened from',
+    openTo: 'Opened to',
+    closeFrom: 'Closed from',
+    closeTo: 'Closed to',
+    roomDeptSection: 'Room and Department',
+    room: 'Room',
+    department: 'Department',
+    status: 'Status',
+    usersSection: 'Users',
+    openedBy: 'Opened by',
+    closedBy: 'Closed by',
+    keywordSection: 'Keyword Search',
+    keyword: 'Keyword',
+    search: 'Search Tickets',
+    clear: 'Clear',
+    all: 'All',
+    open: 'Open',
+    closed: 'Closed',
+    inprogress: 'In Process'
+  },
+  he: {
+    title: '\u05D7\u05D9\u05E4\u05D5\u05E9 \u05EA\u05E7\u05DC\u05D5\u05EA',
+    dateSection: '\u05EA\u05D0\u05E8\u05D9\u05DB\u05D9\u05DD',
+    openFrom: '\u05E0\u05E4\u05EA\u05D7\u05D4 \u05DE\u05EA\u05D0\u05E8\u05D9\u05DA',
+    openTo: '\u05E0\u05E4\u05EA\u05D7\u05D4 \u05E2\u05D3 \u05EA\u05D0\u05E8\u05D9\u05DA',
+    closeFrom: '\u05E0\u05E1\u05D2\u05E8\u05D4 \u05DE\u05EA\u05D0\u05E8\u05D9\u05DA',
+    closeTo: '\u05E0\u05E1\u05D2\u05E8\u05D4 \u05E2\u05D3 \u05EA\u05D0\u05E8\u05D9\u05DA',
+    roomDeptSection: '\u05D7\u05D3\u05E8 \u05D5\u05DE\u05D7\u05DC\u05E7\u05D4',
+    room: '\u05DE\u05E1\u05E4\u05E8 \u05D7\u05D3\u05E8',
+    department: '\u05DE\u05D7\u05DC\u05E7\u05D4',
+    status: '\u05E1\u05D8\u05D8\u05D5\u05E1',
+    usersSection: '\u05DE\u05E9\u05EA\u05DE\u05E9\u05D9\u05DD',
+    openedBy: '\u05E0\u05E4\u05EA\u05D7\u05D4 \u05E2\u05DC \u05D9\u05D3\u05D9',
+    closedBy: '\u05E0\u05E1\u05D2\u05E8\u05D4 \u05E2\u05DC \u05D9\u05D3\u05D9',
+    keywordSection: '\u05D7\u05D9\u05E4\u05D5\u05E9 \u05DC\u05E4\u05D9 \u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7',
+    keyword: '\u05DE\u05D9\u05DC\u05EA \u05DE\u05E4\u05EA\u05D7',
+    search: '\u05D7\u05E4\u05E9 \u05EA\u05E7\u05DC\u05D5\u05EA',
+    clear: '\u05E0\u05E7\u05D4 \u05E9\u05D3\u05D5\u05EA',
+    all: '\u05D4\u05DB\u05DC',
+    open: '\u05E4\u05EA\u05D5\u05D7\u05D4',
+    closed: '\u05E1\u05D2\u05D5\u05E8\u05D4',
+    inprogress: '\u05D1\u05D8\u05D9\u05E4\u05D5\u05DC'
+  },
+  ru: {
+    title: '\u041F\u043E\u0438\u0441\u043A \u0437\u0430\u044F\u0432\u043E\u043A',
+    dateSection: '\u0414\u0430\u0442\u0430',
+    openFrom: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430 \u0441',
+    openTo: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430 \u043F\u043E',
+    closeFrom: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430 \u0441',
+    closeTo: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430 \u043F\u043E',
+    roomDeptSection: '\u041A\u043E\u043C\u043D\u0430\u0442\u0430 \u0438 \u043E\u0442\u0434\u0435\u043B',
+    room: '\u041D\u043E\u043C\u0435\u0440 \u043A\u043E\u043C\u043D\u0430\u0442\u044B',
+    department: '\u041E\u0442\u0434\u0435\u043B',
+    status: '\u0421\u0442\u0430\u0442\u0443\u0441',
+    usersSection: '\u041F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0438',
+    openedBy: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C',
+    closedBy: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430 \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0435\u043C',
+    keywordSection: '\u041F\u043E\u0438\u0441\u043A \u043F\u043E \u043A\u043B\u044E\u0447\u0435\u0432\u043E\u043C\u0443 \u0441\u043B\u043E\u0432\u0443',
+    keyword: '\u041A\u043B\u044E\u0447\u0435\u0432\u043E\u0435 \u0441\u043B\u043E\u0432\u043E',
+    search: '\u041D\u0430\u0439\u0442\u0438 \u0437\u0430\u044F\u0432\u043A\u0438',
+    clear: '\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C \u0444\u0438\u043B\u044C\u0442\u0440',
+    all: '\u0412\u0441\u0435',
+    open: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
+    closed: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
+    inprogress: '\u0412 \u0440\u0430\u0431\u043E\u0442\u0435'
+  }
+};
+
+let currentLang = 'en';
+
+function t(key){ return translations[currentLang][key] || key; }
+
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-option]').forEach(el=>{ el.textContent = t(el.dataset.i18nOption); });
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+}
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  applyTranslations();
+  loadDepartments();
+}
+
+function getLang(){
+  const s = localStorage.getItem('lang');
+  if(s) return s;
+  return navigator.language && navigator.language.startsWith('he') ? 'he' : 'en';
+}
 function authHeaders(){
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': 'Bearer ' + token } : {};
@@ -75,7 +221,7 @@ async function loadDepartments(){
   const res = await fetch('/api/departments', {headers: authHeaders()});
   departments = await res.json();
   const sel = document.getElementById('department');
-  sel.innerHTML = '<option value="">All</option>';
+  sel.innerHTML = `<option value="">${t('all')}</option>`;
   departments.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; sel.appendChild(o); });
 }
 function formatDate(str){
@@ -102,12 +248,13 @@ async function searchTickets(){
   data.forEach((t,idx)=>{
     const dept=departments.find(d=>d.id===t.departmentId);
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${idx+1}</td><td>${t.description}</td><td>${t.room}</td><td>${dept?dept.name:''}</td><td>${t.openedBy||''}</td><td>${t.closedBy||''}</td><td>${formatDate(t.openedAt)}</td><td>${formatDate(t.closedAt)}</td><td>${t.isClosed?'Closed':'Open'}</td>`;
+    tr.innerHTML=`<td>${idx+1}</td><td>${t.description}</td><td>${t.room}</td><td>${dept?dept.name:''}</td><td>${t.openedBy||''}</td><td>${t.closedBy||''}</td><td>${formatDate(t.openedAt)}</td><td>${formatDate(t.closedAt)}</td><td>${t.isClosed?t('closed'):t('open')}</td>`;
     tbody.appendChild(tr);
   });
 }
 document.getElementById('searchForm').addEventListener('submit', e=>{e.preventDefault(); searchTickets();});
-loadDepartments();
+document.getElementById('clearBtn').addEventListener('click', ()=>document.getElementById('searchForm').reset());
+setLang(getLang());
 </script>
 </body>
 </html>
