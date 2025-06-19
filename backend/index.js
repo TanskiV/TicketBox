@@ -283,7 +283,8 @@ app.get('/api/tickets', async (req, res) => {
   const query = {};
   if (req.query.status) {
     const open = req.query.status === 'open';
-    query.isClosed = !open ? true : false;
+    // include documents missing `isClosed` when fetching open tickets
+    query.isClosed = open ? { $ne: true } : true;
   }
   if (req.query.room) query.room = req.query.room;
   if (req.user && req.user.role !== 'admin' && req.user.role !== 'superuser') {
