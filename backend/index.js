@@ -200,6 +200,7 @@ app.use(express.static(PUBLIC_DIR));
 app.use(express.static(SRC_DIR));
 app.use(express.static(FRONTEND));
 app.use('/uploads', express.static(UPLOAD_DIR));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Сервер работает' });
