@@ -444,6 +444,7 @@ function renderNewsList() {
     if(n.imageUrl){
       const img = document.createElement('img');
       img.src = n.imageUrl;
+      img.alt = 'News image';
       img.className = 'img-fluid rounded mb-2';
       div.appendChild(img);
     }

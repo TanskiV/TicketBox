@@ -5,6 +5,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const mongoose = require('mongoose');
 const { Ticket, User, Department, Photo, News } = require('./models');
 
@@ -33,23 +35,23 @@ const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
-const NEWS_UPLOAD_DIR = path.join(UPLOAD_DIR, 'news');
-if (!fs.existsSync(NEWS_UPLOAD_DIR)) {
-  fs.mkdirSync(NEWS_UPLOAD_DIR, { recursive: true });
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 const app = express();
 const upload = multer({ dest: UPLOAD_DIR });
-const newsUpload = multer({
-  storage: multer.diskStorage({
-    destination: NEWS_UPLOAD_DIR,
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      const name = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
-      cb(null, name);
-    }
-  })
+const newsStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'ticketbox_news',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+  },
 });
+const newsUpload = multer({ storage: newsStorage });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const sessions = {}; // token -> { userId, expires }
@@ -497,7 +499,7 @@ app.post('/api/news', requireAdminOrSuperuser, newsUpload.single('image'), async
   const news = await News.create({
     title,
     content,
-    imageUrl: req.file ? '/uploads/news/' + req.file.filename : ''
+    imageUrl: req.file ? req.file.path : ''
   });
   res.json(news);
 });
