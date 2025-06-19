@@ -5,8 +5,6 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const mongoose = require('mongoose');
 const { Ticket, User, Department, Photo, News } = require('./models');
 
@@ -35,23 +33,11 @@ const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
+fs.mkdirSync('uploads/news', { recursive: true });
 
 const app = express();
-const upload = multer({ dest: UPLOAD_DIR });
-const newsStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'ticketbox_news',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-  },
-});
-const newsUpload = multer({ storage: newsStorage });
+const ticketUpload = multer({ dest: UPLOAD_DIR });
+const upload = multer({ dest: 'uploads/news' });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const sessions = {}; // token -> { userId, expires }
@@ -356,7 +342,7 @@ app.get('/api/tickets/search', async (req, res) => {
 });
 
 // Public ticket submission with optional photo
-app.post('/api/public-ticket', upload.single('photo'), async (req, res) => {
+app.post('/api/public-ticket', ticketUpload.single('photo'), async (req, res) => {
   const { room = '', description = '', departmentId = null } = req.body || {};
   if (!room || !departmentId) return res.status(400).json({ error: 'missing fields' });
   const ticketNumber = await getNextTicketNumber();
@@ -493,15 +479,14 @@ app.get('/api/news', async (req, res) => {
   res.json(list);
 });
 
-app.post('/api/news', requireAdminOrSuperuser, newsUpload.single('image'), async (req, res) => {
-  const { title = '', content = '' } = req.body || {};
-  if (!title || !content) return res.status(400).json({ error: 'missing fields' });
-  const news = await News.create({
-    title,
-    content,
-    imageUrl: req.file ? req.file.path : ''
-  });
-  res.json(news);
+app.post('/api/news', requireAdminOrSuperuser, upload.single('image'), async (req, res) => {
+  const { title, content } = req.body;
+  const imageUrl = req.file ? `/uploads/news/${req.file.filename}` : null;
+
+  const newsItem = new News({ title, content, imageUrl });
+  await newsItem.save();
+
+  res.status(201).json({ success: true });
 });
 
 app.delete('/api/news/:id', requireAdminOrSuperuser, async (req, res) => {
