@@ -13,7 +13,10 @@
 <body>
   <div id="header"></div>
   <div class="container">
-    <h2>News</h2>
+    <div class="text-end mb-3">
+      <a href="login.html" class="btn btn-primary">🔐 <span data-i18n="login"></span></a>
+    </div>
+    <h2 data-i18n="news">News</h2>
     <div id="newsList"></div>
   </div>
 <script>
@@ -24,20 +27,66 @@ async function loadNews(){
   const container = document.getElementById('newsList');
   container.innerHTML = '';
   list.forEach(n => {
-    const div = document.createElement('div');
-    div.className = 'news-card';
-    const date = new Date(n.createdAt).toLocaleDateString();
-    div.innerHTML = `<h3>${n.title}</h3><small>${date}</small><p>${n.content}</p>`;
-      if(n.imageUrl){
-        const img = document.createElement('img');
-        img.src = n.imageUrl;
-        img.alt = 'News image';
-        img.className = 'img-fluid rounded mb-3';
-        div.appendChild(img);
-      }
-    container.appendChild(div);
+    const card = document.createElement('div');
+    card.className = 'card news-card';
+    if(n.imageUrl){
+      const img = document.createElement('img');
+      img.src = n.imageUrl;
+      img.className = 'card-img-top';
+      img.alt = 'News Image';
+      card.appendChild(img);
+    }
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const title = document.createElement('h5');
+    title.className = 'card-title';
+    title.textContent = n.title;
+    const content = document.createElement('p');
+    content.className = 'card-text';
+    content.textContent = n.content;
+    const date = document.createElement('p');
+    date.className = 'text-muted small';
+    date.textContent = new Date(n.createdAt).toLocaleString();
+    body.appendChild(title);
+    body.appendChild(content);
+    body.appendChild(date);
+    card.appendChild(body);
+    container.appendChild(card);
   });
 }
+
+const translations = {
+  en: { news: 'News', login: 'Login' },
+  he: { news: '\u05D7\u05D3\u05E9\u05D5\u05EA', login: '\u05DB\u05E0\u05D9\u05E1\u05D4' },
+  ru: { news: '\u041D\u043E\u0432\u043E\u0441\u0442\u0438', login: '\u0412\u043E\u0439\u0442\u0438' }
+};
+
+let currentLang = 'en';
+let t = translations[currentLang];
+
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if(t[key]) el.textContent = t[key];
+  });
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+}
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  t = translations[currentLang];
+  applyTranslations();
+}
+
+function getLang(){
+  const stored = localStorage.getItem('lang');
+  if(stored) return stored;
+  return navigator.language && navigator.language.startsWith('he') ? 'he' : 'en';
+}
+
+setLang(getLang());
 loadNews();
 </script>
 </body>
