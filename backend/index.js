@@ -5,6 +5,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const mongoose = require('mongoose');
 const { Ticket, User, Department, Photo, News } = require('./models');
 
@@ -33,11 +35,21 @@ const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
-fs.mkdirSync('uploads/news', { recursive: true });
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const newsStorage = new CloudinaryStorage({
+  cloudinary,
+  params: { folder: 'news' }
+});
 
 const app = express();
 const ticketUpload = multer({ dest: UPLOAD_DIR });
-const upload = multer({ dest: 'uploads/news' });
+const upload = multer({ storage: newsStorage });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const sessions = {}; // token -> { userId, expires }
@@ -481,8 +493,7 @@ app.get('/api/news', async (req, res) => {
 
 app.post('/api/news', requireAdminOrSuperuser, upload.single('image'), async (req, res) => {
   const { title, content } = req.body;
-  const imageUrl = req.file ? `/uploads/news/${req.file.filename}` : null;
-
+  const imageUrl = req.file ? req.file.path : null;
   const newsItem = new News({ title, content, imageUrl });
   await newsItem.save();
 

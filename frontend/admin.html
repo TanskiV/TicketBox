@@ -15,6 +15,11 @@
   <div id="header"></div>
   <div class="container">
 
+<script>
+if (!localStorage.getItem("token")) {
+  window.location.href = "index.html";
+}
+</script>
 
   <h2 data-i18n="manageDepartments">Manage Departments</h2>
   <div class="panel form-section">
