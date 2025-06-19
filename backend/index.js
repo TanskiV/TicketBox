@@ -203,6 +203,7 @@ app.get(['/search', '/requests/search'], (req, res) => {
 
 app.use(express.static(PUBLIC_DIR));
 app.use(express.static(SRC_DIR));
+app.use('/frontend', express.static(path.join(__dirname, '../frontend')));
 app.use(express.static(FRONTEND));
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

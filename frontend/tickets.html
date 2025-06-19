@@ -216,7 +216,7 @@ const translations = {
       departmentRequired: '\u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u043E\u0442\u0434\u0435\u043B',
       ticketAdded: '\u0417\u0430\u044F\u0432\u043A\u0430 \u0443\u0441\u043F\u0435\u0448\u043D\u043E \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u0430!',
       openTicketsHeading: '\u041E\u0442\u043A\u0440\u044B\u0442\u044B\u0435 \u0437\u0430\u044F\u0432\u043A\u0438',
-      closedTodayHeading: '\u0417\u0430\u043A\u0440\u044B\u0442\u044B\u0435 \u0441\u0435\u0433\u043E\u0434\u043D\u044F'
+      closedTodayHeading: '\u0417\u0430\u043A\u0440\u044B\u0442\u044B\u0435 \u0441\u0435\u0433\u043E\u0434\u043D\u044F',
       openStatus: '\u041E\u0442\u043A\u0440\u044B\u0442\u0430',
       closedStatus: '\u0417\u0430\u043A\u0440\u044B\u0442\u0430',
       close: '\u0417\u0430\u043A\u0440\u044B\u0442\u044C',
@@ -341,6 +341,7 @@ async function loadTickets() {
   if (room) params.set('room', room);
   const res = await fetch('/api/tickets?' + params.toString(), { headers: authHeaders() });
   let data = await res.json();
+  console.log('tickets', data);
 
   const getValue = (ticket) => {
     if (!sortKey) return null;
