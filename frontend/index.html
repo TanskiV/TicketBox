@@ -14,7 +14,7 @@
   <div id="header"></div>
   <div class="container">
     <div class="text-end mb-3">
-      <a href="login.html" class="btn btn-primary">🔐 <span data-i18n="login"></span></a>
+      <a id="loginBtn" href="login.html" class="btn btn-primary btn-sm">🔐 כניסה</a>
     </div>
     <h2 data-i18n="news">News</h2>
     <div id="newsList"></div>
@@ -87,6 +87,11 @@ function getLang(){
 }
 
 setLang(getLang());
+const btn = document.getElementById("loginBtn");
+if (localStorage.getItem("token")) {
+  btn.style.display = "none";
+}
+
 loadNews();
 </script>
 </body>

@@ -424,6 +424,11 @@ tbody tr.divider td {
   border-radius: 12px;
   overflow: hidden;
 }
+.card-img-top {
+  max-height: 250px;
+  object-fit: cover;
+}
+
 .news-card img {
   max-width: 100%;
   height: auto;
