@@ -228,17 +228,14 @@ const translations = {
 
 let currentLang = 'en';
 let departments = [];
-
-function t(key) {
-  return translations[currentLang][key] || key;
-}
+let t = translations[currentLang];
 
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
+    el.textContent = t[el.dataset.i18n];
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
+    el.placeholder = t[el.dataset.i18nPlaceholder];
   });
   document.documentElement.lang = currentLang;
   document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
@@ -247,6 +244,7 @@ function applyTranslations() {
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('lang', lang);
+  t = translations[currentLang];
   applyTranslations();
   loadTickets();
 }
@@ -274,7 +272,7 @@ async function loadDepartmentsList() {
   departments = await res.json();
   const select = document.getElementById('deptSelect');
   if (select) {
-    select.innerHTML = `<option value="">${t('selectDepartment')}</option>`;
+    select.innerHTML = `<option value="">${t.selectDepartment}</option>`;
     departments.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.id;
@@ -284,7 +282,7 @@ async function loadDepartmentsList() {
   }
   const editSelect = document.getElementById('editDept');
   if (editSelect) {
-    editSelect.innerHTML = `<option value="">${t('selectDepartment')}</option>`;
+    editSelect.innerHTML = `<option value="">${t.selectDepartment}</option>`;
     departments.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.id;
@@ -377,29 +375,29 @@ async function loadTickets() {
     const opened = formatDate(ticket.openedAt);
     const openedBy = ticket.openedBy;
     const displayId = ticket.ticketNumber || ticket.id;
-    tr.innerHTML = `<td data-label="${t('id')}">${displayId}</td>` +
-                  `<td data-label="${t('room')}">${ticket.room}</td>` +
-                  `<td data-label="${t('description')}">${ticket.description}</td>` +
-                  `<td data-label="${t('openedBy')}">${openedBy}</td>` +
-                  `<td data-label="${t('openedAt')}">${opened}</td>`;
+    tr.innerHTML = `<td data-label="${t.id}">${displayId}</td>` +
+                  `<td data-label="${t.room}">${ticket.room}</td>` +
+                  `<td data-label="${t.description}">${ticket.description}</td>` +
+                  `<td data-label="${t.openedBy}">${openedBy}</td>` +
+                  `<td data-label="${t.openedAt}">${opened}</td>`;
     const actionTd = document.createElement('td');
-    actionTd.setAttribute('data-label', t('actions'));
+    actionTd.setAttribute('data-label', t.actions); 
     if (currentUser.role === 'admin' || currentUser.role === 'superuser') {
       const editBtn = document.createElement('button');
       editBtn.className = 'btn btn-sm btn-secondary me-1';
-      editBtn.textContent = t('edit');
+      editBtn.textContent = t.edit;
       editBtn.onclick = () => openEdit(ticket);
       actionTd.appendChild(editBtn);
     }
     const closeBtn = document.createElement('button');
     closeBtn.className = 'btn btn-sm btn-danger me-1';
-    closeBtn.textContent = t('close');
+    closeBtn.textContent = t.close;
     closeBtn.onclick = () => closeTicket(ticket.id);
     actionTd.appendChild(closeBtn);
     if (currentUser.role === 'admin' || currentUser.role === 'superuser') {
       const delBtn = document.createElement('button');
       delBtn.className = 'btn btn-sm btn-warning';
-      delBtn.textContent = t('delete');
+      delBtn.textContent = t.delete;
       delBtn.onclick = () => deleteTicket(ticket.id);
       actionTd.appendChild(delBtn);
     }
@@ -416,26 +414,26 @@ async function loadTickets() {
       if (document.documentElement.dir === 'rtl') body.classList.add('text-end');
       const displayId2 = ticket.ticketNumber || ticket.id.slice(-4);
       body.innerHTML =
-        `<p><strong>${t('id')}:</strong> ${displayId2}</p>` +
-        `<p><strong>${t('room')}:</strong> ${ticket.room}</p>` +
-        `<p><strong>${t('description')}:</strong> ${ticket.description}</p>` +
-        `<p><strong>${t('openedBy')}:</strong> ${openedBy}</p>` +
-        `<p><strong>${t('openedAt')}:</strong> ${opened}</p>`;
+        `<p><strong>${t.id}:</strong> ${displayId2}</p>` +
+        `<p><strong>${t.room}:</strong> ${ticket.room}</p>` +
+        `<p><strong>${t.description}:</strong> ${ticket.description}</p>` +
+        `<p><strong>${t.openedBy}:</strong> ${openedBy}</p>` +
+        `<p><strong>${t.openedAt}:</strong> ${opened}</p>`;
       const btnGroup = document.createElement('div');
       btnGroup.className = 'd-flex justify-content-end gap-2';
       const closeBtn2 = document.createElement('button');
       closeBtn2.className = 'btn btn-danger btn-sm';
-      closeBtn2.textContent = t('close');
+      closeBtn2.textContent = t.close;
       closeBtn2.onclick = () => closeTicket(ticket.id);
       btnGroup.appendChild(closeBtn2);
       if (currentUser.role === 'admin' || currentUser.role === 'superuser') {
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-secondary btn-sm';
-        editBtn.textContent = t('edit');
+        editBtn.textContent = t.edit;
         editBtn.onclick = () => openEdit(ticket);
         const delBtn = document.createElement('button');
         delBtn.className = 'btn btn-warning btn-sm';
-        delBtn.textContent = t('delete');
+        delBtn.textContent = t.delete;
         delBtn.onclick = () => deleteTicket(ticket.id);
         btnGroup.appendChild(editBtn);
         btnGroup.appendChild(delBtn);
@@ -467,7 +465,7 @@ async function reopenTicket(id) {
 }
 
 async function deleteTicket(id) {
-  if (!confirm(t('deleteConfirm'))) return;
+  if (!confirm(t.deleteConfirm)) return;
   await fetch(`/api/tickets/${id}`, { method: 'DELETE', headers: authHeaders() });
   loadTickets();
 }
@@ -503,7 +501,7 @@ async function loadClosedTickets() {
                   `<td>${openedBy}</td>` +
                   `<td>${closeDate}</td>` +
                   `<td>${closedBy}</td>` +
-                  `<td>${(currentUser.role === 'admin' || currentUser.role === 'superuser') ? `<button class="btn btn-warning btn-sm" onclick="reopenTicket('${ticket.id}')">${t('reopen')}</button>` : ''}</td>`;
+                  `<td>${(currentUser.role === 'admin' || currentUser.role === 'superuser') ? `<button class="btn btn-warning btn-sm" onclick="reopenTicket('${ticket.id}')">${t.reopen}</button>` : ''}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -522,7 +520,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
   }
   const departmentId = document.getElementById('deptSelect').value;
   if (!departmentId) {
-    alert(t('departmentRequired'));
+    alert(t.departmentRequired);
     return;
   }
   const body = { description, room, departmentId, openedBy: currentUser.username };
@@ -541,7 +539,7 @@ document.getElementById('addForm').addEventListener('submit', async e => {
     const saved = await res.json();
     console.log('Ticket saved', saved);
     e.target.reset();
-    alert(t('ticketAdded'));
+    alert(t.ticketAdded);
     loadTickets();
   } catch (err) {
     console.log(err);
@@ -571,7 +569,7 @@ document.getElementById('editForm').addEventListener('submit', async e => {
     room: document.getElementById('editRoom').value.trim(),
     departmentId: document.getElementById('editDept').value
   };
-  if (!body.departmentId) { alert(t('departmentRequired')); return; }
+  if (!body.departmentId) { alert(t.departmentRequired); return; }
   const res = await fetch('/api/tickets/' + editId, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(body) });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Server error' }));

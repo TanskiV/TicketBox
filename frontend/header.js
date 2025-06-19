@@ -5,10 +5,7 @@
     ru: {home:'\u0413\u043B\u0430\u0432\u043D\u0430\u044F', faults:'\u041F\u043E\u043B\u043E\u043C\u043A\u0438', report:'\u041E\u0442\u043F\u0440\u0430\u0432\u0438\u0442\u044C \u0437\u0430\u044F\u0432\u043A\u0443', admin:'\u0410\u0434\u043C\u0438\u043D', manageUsers:'\u041F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0438', search:'\u041F\u043E\u0438\u0441\u043A', login:'\u0412\u0445\u043E\u0434', logout:'\u0412\u044B\u0445\u043E\u0434'}
   };
   let lang = localStorage.getItem('lang') || (navigator.language && navigator.language.startsWith('he') ? 'he' : 'en');
-
-  function t(key){
-    return translations[lang][key] || key;
-  }
+  let t = translations[lang];
 
   function authHeaders(){
     const token = localStorage.getItem('token');
@@ -18,7 +15,7 @@
   function apply(){
     document.querySelectorAll('#header [data-i18n]').forEach(el => {
       const k = el.getAttribute('data-i18n');
-      if(translations[lang][k]) el.textContent = translations[lang][k];
+      if(t[k]) el.textContent = t[k];
     });
     const sel = document.getElementById('langSwitcher');
     if(sel) sel.value = lang;
@@ -27,6 +24,7 @@
   function updateLang(newLang){
     lang = newLang;
     localStorage.setItem('lang', lang);
+    t = translations[lang];
     apply();
     if(window.setLang) window.setLang(lang);
   }
@@ -34,6 +32,7 @@
   window.addEventListener('storage', e => {
     if(e.key === 'lang') {
       lang = e.newValue || 'en';
+      t = translations[lang];
       apply();
       if(window.setLang) window.setLang(lang);
     }
@@ -47,7 +46,7 @@
     const faultLink = document.getElementById('faultLink');
     if(userStr){
       const user = JSON.parse(userStr);
-      link.textContent = t('logout');
+      link.textContent = t.logout;
       link.href = '#';
       link.addEventListener('click', async e => {
         e.preventDefault();
@@ -60,7 +59,7 @@
       if(usersLinks.length && (user.role === 'admin' || user.role === 'superuser')) usersLinks.forEach(l=>l.classList.remove('d-none'));
       if(faultLink) faultLink.classList.remove('d-none');
     } else {
-      link.textContent = t('login');
+      link.textContent = t.login;
       link.href = 'login.html';
       if(adminLink) adminLink.classList.add('d-none');
       if(usersLinks.length) usersLinks.forEach(l=>l.classList.add('d-none'));

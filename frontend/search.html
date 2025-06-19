@@ -181,12 +181,11 @@ const translations = {
 };
 
 let currentLang = 'en';
-
-function t(key){ return translations[currentLang][key] || key; }
+let t = translations[currentLang];
 
 function applyTranslations(){
-  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-option]').forEach(el=>{ el.textContent = t(el.dataset.i18nOption); });
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t[el.dataset.i18n]; });
+  document.querySelectorAll('[data-i18n-option]').forEach(el=>{ el.textContent = t[el.dataset.i18nOption]; });
   document.documentElement.lang = currentLang;
   document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
 }
@@ -194,6 +193,7 @@ function applyTranslations(){
 function setLang(lang){
   currentLang = lang;
   localStorage.setItem('lang', lang);
+  t = translations[currentLang];
   applyTranslations();
   loadDepartments();
 }
@@ -221,7 +221,7 @@ async function loadDepartments(){
   const res = await fetch('/api/departments', {headers: authHeaders()});
   departments = await res.json();
   const sel = document.getElementById('department');
-  sel.innerHTML = `<option value="">${t('all')}</option>`;
+  sel.innerHTML = `<option value="">${t.all}</option>`;
   departments.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; sel.appendChild(o); });
 }
 function formatDate(str){
@@ -245,10 +245,10 @@ async function searchTickets(){
   const data = await res.json();
   const tbody=document.querySelector('#results tbody');
   tbody.innerHTML='';
-  data.forEach((t,idx)=>{
-    const dept=departments.find(d=>d.id===t.departmentId);
+  data.forEach((ticket,idx)=>{
+    const dept=departments.find(d=>d.id===ticket.departmentId);
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${idx+1}</td><td>${t.description}</td><td>${t.room}</td><td>${dept?dept.name:''}</td><td>${t.openedBy||''}</td><td>${t.closedBy||''}</td><td>${formatDate(t.openedAt)}</td><td>${formatDate(t.closedAt)}</td><td>${t.isClosed?t('closed'):t('open')}</td>`;
+    tr.innerHTML=`<td>${idx+1}</td><td>${ticket.description}</td><td>${ticket.room}</td><td>${dept?dept.name:''}</td><td>${ticket.openedBy||''}</td><td>${ticket.closedBy||''}</td><td>${formatDate(ticket.openedAt)}</td><td>${formatDate(ticket.closedAt)}</td><td>${ticket.isClosed?t.closed:t.open}</td>`;
     tbody.appendChild(tr);
   });
 }
