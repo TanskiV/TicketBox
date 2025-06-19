@@ -218,13 +218,13 @@ app.delete('/api/departments/:id', async (req, res) => {
 });
 
 
-// Users (admin or superuser)
-app.get('/api/users', requireAdminOrSuperuser, async (req, res) => {
+// Users (admin only)
+app.get('/api/users', requireAdmin, async (req, res) => {
   const list = await User.find();
   res.json(list);
 });
 
-app.post('/api/users', requireAdminOrSuperuser, async (req, res) => {
+app.post('/api/users', requireAdmin, async (req, res) => {
   const body = req.body || {};
   const user = await User.create({
     username: body.username || '',
@@ -238,12 +238,12 @@ app.post('/api/users', requireAdminOrSuperuser, async (req, res) => {
   res.json(user);
 });
 
-app.delete('/api/users/:id', requireAdminOrSuperuser, async (req, res) => {
+app.delete('/api/users/:id', requireAdmin, async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
 });
 
-app.post('/api/users/:id/password', requireAdminOrSuperuser, async (req, res) => {
+app.post('/api/users/:id/password', requireAdmin, async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ error: 'not found' });
   user.passwordHash = bcrypt.hashSync(req.body.password || '1234', 10);
@@ -252,7 +252,7 @@ app.post('/api/users/:id/password', requireAdminOrSuperuser, async (req, res) =>
   res.json({ ok: true });
 });
 
-app.patch('/api/users/:id', requireAdminOrSuperuser, async (req, res) => {
+app.patch('/api/users/:id', requireAdmin, async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ error: 'not found' });
   const { username, password, role, departmentId, email, name } = req.body || {};
