@@ -5,8 +5,6 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const mongoose = require('mongoose');
 const { Ticket, User, Department, Photo, News } = require('./models');
 
@@ -36,20 +34,10 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-const newsStorage = new CloudinaryStorage({
-  cloudinary,
-  params: { folder: 'news' }
-});
-
 const app = express();
 const ticketUpload = multer({ dest: UPLOAD_DIR });
-const upload = multer({ storage: newsStorage });
+fs.mkdirSync('uploads/news', { recursive: true });
+const upload = multer({ dest: 'uploads/news' });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const sessions = {}; // token -> { userId, expires }
@@ -376,7 +364,8 @@ app.post('/api/public-ticket', ticketUpload.single('photo'), async (req, res) =>
   }
   console.log('Saved to DB');
   sendEvent({ type: 'ticket:new', ticketId: ticket.id, room: ticket.room });
-  res.json(ticket);
+  const imageUrl = req.file ? `/api/photos/${ticket._id}` : null;
+  res.json({ ...ticket.toObject(), imageUrl });
 });
 
 // Создать заявку
@@ -492,12 +481,11 @@ app.get('/api/news', async (req, res) => {
 });
 
 app.post('/api/news', requireAdminOrSuperuser, upload.single('image'), async (req, res) => {
+  const imageUrl = req.file ? `/uploads/news/${req.file.filename}` : null;
   const { title, content } = req.body;
-  const imageUrl = req.file ? req.file.path : null;
-  const newsItem = new News({ title, content, imageUrl });
-  await newsItem.save();
-
-  res.status(201).json({ success: true });
+  const news = new News({ title, content, imageUrl });
+  await news.save();
+  res.status(201).json(news);
 });
 
 app.delete('/api/news/:id', requireAdminOrSuperuser, async (req, res) => {

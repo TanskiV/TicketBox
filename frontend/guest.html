@@ -40,6 +40,7 @@
           <button type="submit" class="btn btn-primary submit-button" data-i18n="submit">Submit</button>
         </form>
         <div id="success" class="alert alert-success mt-3 d-none" role="alert"></div>
+        <img id="guestImagePreview" src="" class="img-fluid rounded mt-2 d-none" />
       </div>
     </div>
   </div>
@@ -141,12 +142,18 @@
       if (file) fd.append('photo', file);
       const res = await fetch('/api/public-ticket', { method: 'POST', body: fd });
       const msg = document.getElementById('success');
+      const ticket = await res.json().catch(() => null);
       if (res.ok) {
         msg.textContent = t.success;
         msg.classList.remove('d-none');
+        if (ticket && ticket.imageUrl) {
+          const img = document.getElementById('guestImagePreview');
+          img.src = ticket.imageUrl;
+          img.classList.remove('d-none');
+        }
         e.target.reset();
       } else {
-        const err = await res.json().catch(() => ({ error: t.serverError }));
+        const err = ticket || { error: t.serverError };
         msg.textContent = err.error || t.serverError;
         msg.classList.remove('d-none');
         msg.classList.replace('alert-success','alert-danger');

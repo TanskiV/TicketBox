@@ -22,7 +22,7 @@ if (!localStorage.getItem('token')) {
     <form id="newsForm" enctype="multipart/form-data" class="form-section">
       <input type="text" id="title" class="form-control mb-2" placeholder="Title" required>
       <textarea id="content" class="form-control mb-2" placeholder="Content" required></textarea>
-      <input type="file" id="image" class="form-control mb-2" accept="image/*">
+      <input type="file" id="image" name="image" class="form-control mb-2" accept="image/*">
       <button type="submit" class="btn btn-primary">Publish</button>
     </form>
   </div>

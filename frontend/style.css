@@ -399,7 +399,8 @@ tbody tr.divider td {
 }
 
 @media (min-width: 768px) {
-  .logo-container img {
+  .logo-container img,
+  .logo-img {
     max-height: 120px;
     width: auto;
     height: auto;
