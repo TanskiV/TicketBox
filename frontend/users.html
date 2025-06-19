@@ -20,10 +20,33 @@ if (!localStorage.getItem('token')) {
 <div id="header"></div>
 <div class="container mt-3">
   <h2 data-i18n="manageUsers">Manage Users</h2>
+  <div class="panel form-section mb-3">
+    <form id="userForm" class="row g-2 align-items-end" autocomplete="off">
+      <div class="col-md-3">
+        <input type="text" id="newUsername" class="form-control" placeholder="Login" required />
+      </div>
+      <div class="col-md-3">
+        <input type="password" id="newPassword" class="form-control" placeholder="Password" required />
+      </div>
+      <div class="col-md-3">
+        <select id="userDept" class="form-select"></select>
+      </div>
+      <div class="col-md-2">
+        <select id="userRole" class="form-select">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+          <option value="superuser">Superuser</option>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100">Add</button>
+      </div>
+    </form>
+  </div>
   <div class="table-responsive">
     <table id="usersTable" class="table table-bordered table-sm">
       <thead>
-        <tr><th>Name</th><th>Email</th><th data-i18n="department">Department</th><th>Role</th><th></th></tr>
+        <tr><th>Name</th><th>Email</th><th data-i18n="department">Department</th><th>Role</th><th>Edit</th><th>Delete</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -62,6 +85,11 @@ async function loadDepartments(){
   const sel = document.getElementById('editDept');
   sel.innerHTML = '<option value=""></option>';
   departments.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; sel.appendChild(o); });
+  const userSel = document.getElementById('userDept');
+  if(userSel){
+    userSel.innerHTML = '';
+    departments.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.name; userSel.appendChild(o); });
+  }
 }
 async function loadUsers(){
   const res = await fetch('/api/users', {headers: authHeaders()});
@@ -75,13 +103,20 @@ function renderTable(){
     const tr=document.createElement('tr');
     const dept=departments.find(d=>d.id===u.departmentId);
     tr.innerHTML=`<td>${u.username}</td><td>${u.email||''}</td><td>${dept?dept.name:''}</td><td>${u.role}</td>`;
-    const td=document.createElement('td');
-    const btn=document.createElement('button');
-    btn.className='btn btn-sm btn-secondary';
-    btn.textContent='Edit';
-    btn.onclick=()=>startEdit(u);
-    td.appendChild(btn);
-    tr.appendChild(td);
+    const editTd=document.createElement('td');
+    const editBtn=document.createElement('button');
+    editBtn.className='btn btn-sm btn-secondary';
+    editBtn.textContent='Edit';
+    editBtn.onclick=()=>startEdit(u);
+    editTd.appendChild(editBtn);
+    const delTd=document.createElement('td');
+    const delBtn=document.createElement('button');
+    delBtn.className='btn btn-sm btn-danger';
+    delBtn.textContent='Delete';
+    delBtn.onclick=()=>deleteUser(u.id);
+    delTd.appendChild(delBtn);
+    tr.appendChild(editTd);
+    tr.appendChild(delTd);
     tbody.appendChild(tr);
   });
 }
@@ -92,6 +127,11 @@ function startEdit(u){
   document.getElementById('editDept').value=u.departmentId||'';
   document.getElementById('editRole').value=u.role;
   document.getElementById('editPassword').value='';
+}
+
+async function deleteUser(id){
+  await fetch('/api/users/'+id, {method:'DELETE', headers: authHeaders()});
+  loadUsers();
 }
 
 document.getElementById('editForm').addEventListener('submit', async e=>{
@@ -108,6 +148,22 @@ document.getElementById('editForm').addEventListener('submit', async e=>{
   e.target.reset();
   loadUsers();
 });
+
+const userForm = document.getElementById('userForm');
+if(userForm){
+  userForm.addEventListener('submit', async e=>{
+    e.preventDefault();
+    const body={
+      username: document.getElementById('newUsername').value,
+      password: document.getElementById('newPassword').value,
+      departmentId: document.getElementById('userDept').value,
+      role: document.getElementById('userRole').value
+    };
+    await fetch('/api/users', {method:'POST', headers:{'Content-Type':'application/json', ...authHeaders()}, body: JSON.stringify(body)});
+    e.target.reset();
+    loadUsers();
+  });
+}
 
 loadDepartments().then(loadUsers);
 </script>

@@ -34,38 +34,6 @@ if (!localStorage.getItem("token")) {
     <ul id="deptList" class="list-group mt-2"></ul>
   </div>
 
-  <h2 data-i18n="manageUsers">Manage Users</h2>
-  <div class="panel form-section">
-    <form id="userForm" class="row g-2 align-items-end" autocomplete="off">
-      <div class="col-md-3">
-        <input type="text" id="newUsername" data-i18n-placeholder="login" class="form-control" autocomplete="off" required />
-      </div>
-      <div class="col-md-3">
-        <input type="password" id="newPassword" data-i18n-placeholder="password" class="form-control" autocomplete="new-password" required />
-      </div>
-      <div class="col-md-3">
-        <select id="userDept" class="form-select"></select>
-      </div>
-      <div class="col-md-2">
-        <select id="userRole" class="form-select">
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-          <option value="superuser">Superuser</option>
-        </select>
-      </div>
-      <div class="col-md-1">
-        <button type="submit" class="btn btn-primary w-100" data-i18n="add">Add</button>
-      </div>
-    </form>
-    <div class="table-responsive">
-      <table id="userList" class="table table-bordered table-sm">
-        <thead>
-          <tr><th data-i18n="login">Login</th><th data-i18n="role">Role</th><th data-i18n="department">Department</th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
 
   <h2 data-i18n="changePassword">Change Password</h2>
   <div class="panel form-section">
