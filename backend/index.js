@@ -196,6 +196,11 @@ app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(FRONTEND, 'admin.html'));
 });
 
+app.get(['/search', '/requests/search'], (req, res) => {
+  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superuser')) return res.redirect('/login.html');
+  res.sendFile(path.join(FRONTEND, 'search.html'));
+});
+
 app.use(express.static(PUBLIC_DIR));
 app.use(express.static(SRC_DIR));
 app.use(express.static(FRONTEND));
@@ -311,6 +316,40 @@ app.get('/api/tickets/closed', async (req, res) => {
   }
   const tickets = await Ticket.find(query);
   res.json(tickets);
+});
+
+// Search tickets with various filters
+app.get('/api/tickets/search', async (req, res) => {
+  const query = {};
+  if (req.query.openFrom || req.query.openTo) {
+    query.openedAt = {};
+    if (req.query.openFrom) query.openedAt.$gte = new Date(req.query.openFrom);
+    if (req.query.openTo) query.openedAt.$lte = new Date(req.query.openTo);
+  }
+  if (req.query.closeFrom || req.query.closeTo) {
+    query.closedAt = {};
+    if (req.query.closeFrom) query.closedAt.$gte = new Date(req.query.closeFrom);
+    if (req.query.closeTo) query.closedAt.$lte = new Date(req.query.closeTo);
+  }
+  if (req.query.room) query.room = req.query.room;
+  if (req.query.status) {
+    if (req.query.status === 'closed') query.isClosed = true;
+    else if (req.query.status === 'open' || req.query.status === 'inprogress') query.isClosed = false;
+  }
+  if (req.query.openedBy) query.openedBy = new RegExp(req.query.openedBy, 'i');
+  if (req.query.closedBy) query.closedBy = new RegExp(req.query.closedBy, 'i');
+  if (req.query.departmentId) query.departmentId = req.query.departmentId;
+  if (req.query.keyword) query.description = new RegExp(req.query.keyword, 'i');
+  if (req.user && req.user.role !== 'admin' && req.user.role !== 'superuser') {
+    query.departmentId = req.user.departmentId;
+  }
+  const tickets = await Ticket.find(query);
+  const list = [];
+  for (const t of tickets) {
+    const hasPhoto = await Photo.exists({ ticketId: t._id });
+    list.push({ ...t.toObject(), photoUrl: hasPhoto ? `/api/photos/${t._id}` : '' });
+  }
+  res.json(list);
 });
 
 // Public ticket submission with optional photo
