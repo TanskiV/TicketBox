@@ -41,6 +41,7 @@
         <th data-i18n="id" data-key="id" class="sortable">ID</th>
         <th data-i18n="room" data-key="room" class="sortable">Room</th>
         <th data-i18n="description" data-key="description" class="sortable">Description</th>
+        <th data-i18n="photo">Photo</th>
         <th data-i18n="openedBy" data-key="openedBy" class="sortable">Opened by</th>
         <th data-i18n="openedAt" data-key="openedAt" class="sortable">Opened at</th>
         <th data-i18n="actions">Actions</th>
@@ -378,6 +379,7 @@ async function loadTickets() {
     tr.innerHTML = `<td data-label="${t.id}">${displayId}</td>` +
                   `<td data-label="${t.room}">${ticket.room}</td>` +
                   `<td data-label="${t.description}">${ticket.description}</td>` +
+                  `<td data-label="${t.photo}">${ticket.photoUrl ? `<img src="${ticket.photoUrl}" class="photo-thumb" alt="Фото"/>` : ''}</td>` +
                   `<td data-label="${t.openedBy}">${openedBy}</td>` +
                   `<td data-label="${t.openedAt}">${opened}</td>`;
     const actionTd = document.createElement('td');
@@ -417,6 +419,7 @@ async function loadTickets() {
         `<p><strong>${t.id}:</strong> ${displayId2}</p>` +
         `<p><strong>${t.room}:</strong> ${ticket.room}</p>` +
         `<p><strong>${t.description}:</strong> ${ticket.description}</p>` +
+        (ticket.photoUrl ? `<p><strong>${t.photo}:</strong><br><img src="${ticket.photoUrl}" class="photo-thumb" alt="Фото"/></p>` : '') +
         `<p><strong>${t.openedBy}:</strong> ${openedBy}</p>` +
         `<p><strong>${t.openedAt}:</strong> ${opened}</p>`;
       const btnGroup = document.createElement('div');
