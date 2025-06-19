@@ -56,7 +56,7 @@
         window.location.href = '/login.html';
       });
       if(user.role === 'admin' && adminLink) adminLink.classList.remove('d-none');
-      if(usersLinks.length && (user.role === 'admin' || user.role === 'superuser')) usersLinks.forEach(l=>l.classList.remove('d-none'));
+      if(usersLinks.length && user.role === 'admin') usersLinks.forEach(l=>l.classList.remove('d-none'));
       if(faultLink) faultLink.classList.remove('d-none');
     } else {
       link.textContent = t.login;

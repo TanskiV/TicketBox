@@ -71,9 +71,9 @@ let editId = null;
 function authHeaders(){ const t = localStorage.getItem('token'); return t ? { 'Authorization':'Bearer '+t } : {}; }
 async function requireLogin(){
   const stored = localStorage.getItem('user');
-  if(stored){ const u = JSON.parse(stored); if(u.role==='admin'||u.role==='superuser'){ currentUser=u; return; } }
+  if(stored){ const u = JSON.parse(stored); if(u.role==='admin'){ currentUser=u; return; } }
   const res = await fetch('/api/me');
-  if(res.ok){ const u = await res.json(); localStorage.setItem('user', JSON.stringify(u)); if(u.role==='admin'||u.role==='superuser'){ currentUser=u; return; }}
+  if(res.ok){ const u = await res.json(); localStorage.setItem('user', JSON.stringify(u)); if(u.role==='admin'){ currentUser=u; return; }}
   localStorage.removeItem('user');
   localStorage.removeItem('token');
   window.location.href = '/login.html';
