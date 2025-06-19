@@ -390,6 +390,14 @@ tbody tr.divider td {
   }
 }
 
+@media (min-width: 768px) {
+  .logo img,
+  .logo-container img,
+  .logo-img {
+    max-height: 120px;
+  }
+}
+
 .logo-container {
   padding-top: 10px;
   padding-bottom: 10px;
