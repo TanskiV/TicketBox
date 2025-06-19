@@ -91,16 +91,17 @@
     };
 
     let currentLang = 'en';
-    function t(key){ return translations[currentLang][key] || key; }
+    let t = translations[currentLang];
     function applyTranslations(){
-      document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
-      document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPlaceholder); });
+      document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t[el.dataset.i18n]; });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{ el.placeholder = t[el.dataset.i18nPlaceholder]; });
       document.documentElement.lang = currentLang;
       document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
     }
     function setLang(lang){
       currentLang = lang;
       localStorage.setItem('lang', lang);
+      t = translations[currentLang];
       applyTranslations();
       loadDepts();
     }
@@ -112,7 +113,7 @@
       const res = await fetch('/api/departments');
       const list = await res.json();
       const sel = document.getElementById('dept');
-      sel.innerHTML = '<option value="">'+t('selectDepartment')+'</option>';
+      sel.innerHTML = '<option value="">'+t.selectDepartment+'</option>';
       list.forEach(d=>{
         const o=document.createElement('option');
         o.value=d.id;
@@ -141,12 +142,12 @@
       const res = await fetch('/api/public-ticket', { method: 'POST', body: fd });
       const msg = document.getElementById('success');
       if (res.ok) {
-        msg.textContent = t('success');
+        msg.textContent = t.success;
         msg.classList.remove('d-none');
         e.target.reset();
       } else {
-        const err = await res.json().catch(() => ({ error: t('serverError') }));
-        msg.textContent = err.error || t('serverError');
+        const err = await res.json().catch(() => ({ error: t.serverError }));
+        msg.textContent = err.error || t.serverError;
         msg.classList.remove('d-none');
         msg.classList.replace('alert-success','alert-danger');
       }

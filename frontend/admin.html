@@ -258,17 +258,14 @@ const translations = {
 
 let currentLang = 'en';
 let departments = [];
-
-function t(key) {
-  return translations[currentLang][key] || key;
-}
+let t = translations[currentLang];
 
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
+    el.textContent = t[el.dataset.i18n];
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
+    el.placeholder = t[el.dataset.i18nPlaceholder];
   });
   document.documentElement.lang = currentLang;
   document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
@@ -277,6 +274,7 @@ function applyTranslations() {
 function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('lang', lang);
+  t = translations[currentLang];
   applyTranslations();
   refreshDepartments();
 }
@@ -293,7 +291,7 @@ async function loadDepartmentsList() {
   departments = await res.json();
   const select = document.getElementById('deptSelect');
   if (select) {
-    select.innerHTML = `<option value="">${t('selectDepartment')}</option>`;
+    select.innerHTML = `<option value="">${t.selectDepartment}</option>`;
     departments.forEach(d => {
       const opt = document.createElement('option');
       opt.value = d.id;
@@ -480,7 +478,7 @@ document.getElementById('newsForm').addEventListener('submit', async e => {
   }
 });
 
-function tTranslate(key) { return t(key); }
+function tTranslate(key) { return t[key]; }
 
 loadNewsList();
 
