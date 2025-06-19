@@ -434,3 +434,8 @@ tbody tr.divider td {
   max-width: 100%;
   height: auto;
 }
+
+html[dir="rtl"] .form-select {
+  direction: ltr;
+  text-align: right;
+}
