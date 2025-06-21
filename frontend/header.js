@@ -56,7 +56,10 @@
         window.location.href = '/login.html';
       });
       if(user.role === 'admin' && adminLink) adminLink.classList.remove('d-none');
-      if(usersLinks.length && user.role === 'admin') usersLinks.forEach(l=>l.classList.remove('d-none'));
+      if(usersLinks.length){
+        if(user.role === 'admin') usersLinks.forEach(l=>l.classList.remove('d-none'));
+        else if(user.role === 'superuser') usersLinks.forEach(l=>{ if(l.id==='searchLink') l.classList.remove('d-none'); });
+      }
       if(faultLink) faultLink.classList.remove('d-none');
     } else {
       link.textContent = t.login;
