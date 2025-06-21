@@ -446,3 +446,10 @@ html[dir="rtl"] .form-select {
   direction: rtl;
   text-align: right;
 }
+
+.closed-card {
+  background-color: #f8d7da;
+}
+.closed-card p {
+  text-decoration: line-through;
+}
