@@ -54,22 +54,7 @@
 
   <div id="closedSection" class="mt-4">
     <h3 data-i18n="closedTodayHeading">תקלות שנסגרו בשבעה הימים האחרונים</h3>
-    <div class="table-responsive">
-      <table id="closedTable" class="table table-bordered table-sm">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th data-i18n="room">Room</th>
-            <th data-i18n="description">Description</th>
-            <th data-i18n="openedAt">Opened at</th>
-            <th data-i18n="openedBy">Opened by</th>
-            <th data-i18n="closedAt">Closed at</th>
-            <th data-i18n="closedBy">Closed by</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="closedCards"></div>
   </div>
 
 <script>
@@ -491,29 +476,47 @@ async function loadClosedTickets() {
   params.set('to', toDate);
   const res = await fetch('/api/tickets/closed?' + params.toString(), { headers: authHeaders() });
   const data = await res.json();
-  const tbody = document.querySelector('#closedTable tbody');
-  tbody.innerHTML = '';
+  data.sort((a, b) => new Date(b.closedAt) - new Date(a.closedAt));
+  const container = document.getElementById('closedCards');
+  container.innerHTML = '';
   const section = document.getElementById('closedSection');
   if (data.length === 0) {
     section.style.display = 'none';
     return;
   }
   section.style.display = 'block';
-  data.forEach((ticket, idx) => {
-    const tr = document.createElement('tr');
+  data.forEach(ticket => {
     const openedBy = ticket.openedBy || 'לא ידוע';
     const closedBy = ticket.closedBy || 'לא ידוע';
     const openDate = formatDate(ticket.openedAt);
     const closeDate = formatDate(ticket.closedAt);
-    tr.innerHTML = `<td>${idx + 1}</td>` +
-                  `<td>${ticket.room}</td>` +
-                  `<td>${ticket.description}</td>` +
-                  `<td>${openDate}</td>` +
-                  `<td>${openedBy}</td>` +
-                  `<td>${closeDate}</td>` +
-                  `<td>${closedBy}</td>` +
-                  `<td>${(currentUser.role === 'admin' || currentUser.role === 'superuser') ? `<button class="btn btn-warning btn-sm" onclick="reopenTicket('${ticket.id}')">${t.reopen}</button>` : ''}</td>`;
-    tbody.appendChild(tr);
+    const displayId = ticket.ticketNumber || ticket.id.slice(-4);
+    const card = document.createElement('div');
+    card.className = 'card mb-3 closed-card';
+    card.style.fontSize = '0.95rem';
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    if (document.documentElement.dir === 'rtl') body.classList.add('text-end');
+    body.innerHTML =
+      `<p><strong>${t.id}:</strong> ${displayId}</p>` +
+      `<p><strong>${t.room}:</strong> ${ticket.room}</p>` +
+      `<p><strong>${t.description}:</strong> ${ticket.description}</p>` +
+      `<p><strong>${t.openedBy}:</strong> ${openedBy}</p>` +
+      `<p><strong>${t.openedAt}:</strong> ${openDate}</p>` +
+      `<p><strong>${t.closedBy}:</strong> ${closedBy}</p>` +
+      `<p><strong>${t.closedAt}:</strong> ${closeDate}</p>`;
+    if (currentUser.role === 'admin' || currentUser.role === 'superuser') {
+      const btnGroup = document.createElement('div');
+      btnGroup.className = 'd-flex justify-content-end';
+      const reopenBtn = document.createElement('button');
+      reopenBtn.className = 'btn btn-warning btn-sm';
+      reopenBtn.textContent = t.reopen;
+      reopenBtn.onclick = () => reopenTicket(ticket.id);
+      btnGroup.appendChild(reopenBtn);
+      body.appendChild(btnGroup);
+    }
+    card.appendChild(body);
+    container.appendChild(card);
   });
 }
 
